@@ -7,7 +7,6 @@ def render(g_map:Map,player:Player)->str:
     return g_map.draw_as_a_map(rendered_map)
 
 def move(g_map:Map,player:Player,key:str):
-    direction= Player.Direction.UP
     match key:
         case "s":
             direction = Player.Direction.DOWN
@@ -15,7 +14,10 @@ def move(g_map:Map,player:Player,key:str):
             direction = Player.Direction.LEFT
         case "d":
             direction = Player.Direction.RIGHT
-
-    new_x,new_y=player.pruff_a_move(direction)
+        case "w":
+            direction = Player.Direction.UP
+        case _:
+            return
+    new_x,new_y=player.next_position(direction)
     if g_map.is_movable(new_x,new_y):
         player.move(direction)

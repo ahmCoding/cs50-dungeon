@@ -2,7 +2,7 @@ from enum import Enum
 
 class Player:
     class Direction(Enum):
-        """"
+        """
         The Enum representing the direction of the player.
         the first element of the tuple represents the x value for horizontal movement
         the second element represents the y value for vertical movement
@@ -27,6 +27,6 @@ class Player:
         self.x+=dx
         self.y+=dy
 
-    def pruff_a_move(self, direction:Direction)->tuple[int,int]:
+    def next_position(self, direction:Direction)->tuple[int,int]:
         dx, dy = direction.value
         return self.x + dx, self.y + dy
