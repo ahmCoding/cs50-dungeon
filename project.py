@@ -1,5 +1,5 @@
-from Player import Player
-from Map import Map
+from game.Player import Player
+from game.Map import Map
 
 def render(g_map:Map,player:Player)->str:
     rendered_map = g_map.get_game_map()
@@ -26,12 +26,13 @@ def check_win(g_map:Map,player:Player)->bool:
     return g_map.get_tile(player.x,player.y) == g_map.get_win_tile()
 
 def main():
-    print("w: up , s: down , a: left, d: right, ;q for quit")
+    print("w: up , s: down , a: left, d: right, :q for quit")
     g_map=Map.get_map_obj(12,8)
     player=Player(1,1)
     while True:
         print(render(g_map,player))
         if check_win(g_map,player):
+            print("*"*9 + " Gewonnen  "+"*"*9 )
             break
         user_i=input("enter your choice: ")
         if user_i==":q":

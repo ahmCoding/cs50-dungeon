@@ -1,8 +1,5 @@
 import random
 
-from game.Player import Player
-
-
 class Map:
     def __init__(self,w:int=5,h:int=5):
         """
