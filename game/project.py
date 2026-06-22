@@ -7,17 +7,15 @@ def render(g_map:Map,player:Player)->str:
     return g_map.draw_as_a_map(rendered_map)
 
 def move(g_map:Map,player:Player,key:str):
+    direction= Player.Direction.UP
     match key:
-        case "w":
-            if g_map.is_movable(player.y-1,player.x):
-                player.move(Player.Direction.UP)
         case "s":
-            if g_map.is_movable(player.y+1, player.x):
-                player.move(Player.Direction.DOWN)
+            direction = Player.Direction.DOWN
         case "a":
-            if g_map.is_movable(player.y, player.x-1):
-                player.move(Player.Direction.LEFT)
-
+            direction = Player.Direction.LEFT
         case "d":
-            if g_map.is_movable(player.y, player.x+1):
-                player.move(Player.Direction.RIGHT)
+            direction = Player.Direction.RIGHT
+
+    new_x,new_y=player.pruff_a_move(direction)
+    if g_map.is_movable(new_x,new_y):
+        player.move(direction)

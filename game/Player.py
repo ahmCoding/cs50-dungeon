@@ -27,3 +27,6 @@ class Player:
         self.x+=dx
         self.y+=dy
 
+    def pruff_a_move(self, direction:Direction)->tuple[int,int]:
+        dx, dy = direction.value
+        return self.x + dx, self.y + dy
