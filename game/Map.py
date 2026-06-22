@@ -4,7 +4,11 @@ from game.Player import Player
 
 
 class Map:
-    def __init__(self,h:int=5,w:int=5):
+    def __init__(self,w:int=5,h:int=5):
+        """
+        :param w: width of the map /x
+        :param h: height of the map /y
+        """
         self._height=h
         self._width= w
         self._map_chars={'wall':'#','field':'.','stairs':'>'}
@@ -25,8 +29,8 @@ class Map:
         self._map=tmp_map
 
     @classmethod
-    def get_map_obj(cls,h:int=5,w:int=5):
-        tmp_obj=cls(h,w)
+    def get_map_obj(cls,w:int=5,h:int=5):
+        tmp_obj=cls(w,h)
         tmp_obj._create_map()
         return tmp_obj
 
@@ -41,24 +45,22 @@ class Map:
     def __str__(self):
         return self._map_to_string(self._map)
 
-    def is_movable(self,y,x):
+    def is_movable(self,x,y):
         if 0 <= x < self._width and 0 <= y < self._height:
             return self._map[y][x]!=self._map_chars['wall']
         return False
 
-    def get_game_map(self):
-        return self._map
+    def get_game_map(self)->list[list[str]]:
+        return [[self._map[h][w] for w in range(self._width)] for h in range(self._height)]
 
-    def draw_as_a_map(self,l_map:list[str])->str:
+    def draw_as_a_map(self,l_map:list[list[str]])->str:
         return self._map_to_string(l_map)
 
 
 def main():
     map_obj=Map.get_map_obj(8,12)
     p1=Player(1,1)
-    print(render(map_obj,p1),end="")
-    p1.move(Player.Direction.RIGHT)
-    print(render(map_obj,p1),end="")
+
 
 if __name__=="__main__":
     main()
