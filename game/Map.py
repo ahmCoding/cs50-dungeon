@@ -57,12 +57,4 @@ class Map:
         return self._map_to_string(l_map)
 
 
-def main():
-    map_obj=Map.get_map_obj(8,12)
-    p1=Player(1,1)
-
-
-if __name__=="__main__":
-    main()
-
 
