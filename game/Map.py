@@ -47,7 +47,7 @@ class Map:
 
     def is_movable(self,x,y):
         if 0 <= x < self._width and 0 <= y < self._height:
-            return self._map[y][x]!=self._map_chars['wall']
+            return self.get_tile(x,y)!=self._map_chars['wall']
         return False
 
     def get_game_map(self)->list[list[str]]:
@@ -56,5 +56,8 @@ class Map:
     def draw_as_a_map(self,l_map:list[list[str]])->str:
         return self._map_to_string(l_map)
 
+    def get_tile(self,x,y):
+        return self._map[y][x]
 
-
+    def get_win_tile(self)-> str:
+        return self._map_chars['stairs']
