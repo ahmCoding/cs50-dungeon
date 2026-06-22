@@ -42,15 +42,14 @@ class Map:
         return self._map_to_string(self._map)
 
     def is_movable(self,x,y):
-        return self._map[y][x]!=self._map_chars['wall']
+        if 0 <= x <= self._width and 0 <= y <= self._height:
+            return self._map[y][x]!=self._map_chars['wall']
+        return False
 
     def render(self,player:Player) -> str:
-        rendered_map=[[self._map[h][w] for w in range(self._width)]for h in range(self._height)] # deep copy
-        for h in range(self._height):
-            for w in range(self._width):
-                if player.x == w and player.y == h:
-                    if self.is_movable(w,h):
-                        rendered_map[h][w]=self._map_chars['player']
+        rendered_map=[[self._map[h][w] for w in range(self._width)]for h in range(self._height)] # grid copy
+        if self.is_movable(player.x,player.y):
+            rendered_map[player.y][player.x]=self._map_chars['player']
         return self._map_to_string(rendered_map)
 
 
@@ -59,7 +58,8 @@ class Map:
 def main():
     map_obj=Map.get_map(8,12)
     p1=Player(1,1)
-
+    print(map_obj.render(p1),end="")
+    p1.move(p1.Direction.RIGHT)
     print(map_obj.render(p1),end="")
 
 if __name__=="__main__":
