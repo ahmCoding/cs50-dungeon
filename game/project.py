@@ -9,15 +9,15 @@ def render(g_map:Map,player:Player)->str:
 def move(g_map:Map,player:Player,key:str):
     match key:
         case "w":
-            if not g_map.is_movable(player.y-1,player.x):
+            if g_map.is_movable(player.y-1,player.x):
                 player.move(Player.Direction.UP)
         case "s":
-            if not g_map.is_movable(player.y+1, player.x):
+            if g_map.is_movable(player.y+1, player.x):
                 player.move(Player.Direction.DOWN)
         case "a":
-            if not g_map.is_movable(player.y, player.x-1):
+            if g_map.is_movable(player.y, player.x-1):
                 player.move(Player.Direction.LEFT)
 
         case "d":
-            if not g_map.is_movable(player.y, player.x+1):
+            if g_map.is_movable(player.y, player.x+1):
                 player.move(Player.Direction.RIGHT)

@@ -4,12 +4,13 @@ class Player:
     class Direction(Enum):
         """"
         The Enum representing the direction of the player.
-        Technically we have the coordination in y,x format
+        the first element of the tuple represents the x value for horizontal movement
+        the second element represents the y value for vertical movement
         """
-        UP=(-1,0)
-        DOWN=(1,0)
-        LEFT=(0,-1)
-        RIGHT=(0,1)
+        UP=(0,-1)
+        DOWN=(0,1)
+        LEFT=(-1,0)
+        RIGHT=(1,0)
 
     def __init__(self,x:int=0,y:int=0,char:str="@"):
         """
@@ -22,7 +23,7 @@ class Player:
         self.char=char
 
     def move(self,direction:Direction):
-        dy,dx=direction.value
+        dx,dy=direction.value
         self.x+=dx
         self.y+=dy
 
