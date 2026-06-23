@@ -12,8 +12,6 @@ class Map:
         """
         self._height = h
         self._width = w
-        # self._map_chars = {"wall": "#", "field": ".", "stairs": ">"}
-        # self._map = list(list(Tile))
         self._map = []
         self._win_tile = Tile.STAIRS
 
@@ -22,7 +20,7 @@ class Map:
         r_y = random.randint(1, self._height - 2)
 
         tmp_map = [[Tile.WALL for w in range(self._width)] for h in range(self._height)]
-        # only writhe somewhere in the middle of field
+        # only write somewhere in the middle of field
         for h in range(1, self._height - 1):
             for w in range(1, self._width - 1):
                 if h == r_y and w == r_x:
@@ -45,18 +43,6 @@ class Map:
         tmp_obj._map = grid
         return tmp_obj
 
-    # @staticmethod
-    # def _map_to_string(game_map: list) -> str:
-    #     tmp_map = ""
-    #     # map_as_list=[ for name in h.name  for h in len(game_map)]
-    #     for tiles in game_map:
-    #         tmp_map += "".join([str(t) for t in tiles])
-    #         tmp_map += "\n"
-    #     return tmp_map
-    #
-    # def __str__(self):
-    #     return self._map_to_string(self._map)
-
     def is_movable(self, x, y) -> bool:
         return self.get_tile(x, y) != Tile.WALL
 
@@ -65,9 +51,6 @@ class Map:
             [self.get_tile(x, y) for x in range(self._width)]
             for y in range(self._height)
         ]
-
-    # def draw_as_a_map(self, l_map: list[list[str]]) -> str:
-    #     return self._map_to_string(l_map)
 
     def get_tile(self, x, y) -> Tile:
         """
@@ -88,12 +71,3 @@ class Map:
         :return: width and height of the map as a tuple
         """
         return self._width, self._height
-
-
-# def main():
-#     m1 = Map.get_map_obj()
-#     print(m1)
-#
-#
-# if __name__ == "__main__":
-#     main()
