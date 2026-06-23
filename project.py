@@ -32,7 +32,7 @@ def main():
     while True:
         print(render(g_map,player))
         if check_win(g_map,player):
-            print("*"*9 + " Gewonnen  "+"*"*9 )
+            print("*"*9 + " Game Won  "+"*"*9 )
             break
         user_i=input("enter your choice: ")
         if user_i==":q":
