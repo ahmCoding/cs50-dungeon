@@ -2,7 +2,7 @@ import pytest
 
 from game.Map import Map
 from game.Player import Player
-from project import check_win, move
+from project import check_win, move, render
 
 
 @pytest.fixture
@@ -13,7 +13,7 @@ def g_map():
         ["#", ".", ">", ".", "#"],
         ["#", ".", ".", ".", "#"],
         ["#", "#", "#", "#", "#"],
-    ]
+    ]  # the win-tile is at coordinate x=2,y=2 , the char is ">"
     my_map = Map.get_map_obj_from_grid(my_map)
     return my_map
 
@@ -55,25 +55,31 @@ def test_move_to_lower_wall(g_map: Map, player: Player):
     assert player.y == m_height - 2
 
 
-def test_check_win_false(g_map: Map, player: Player):
-    assert not (
-        check_win(g_map, player)
-    )  # player at coordinate x=1,y=1 , map tile = "."
-    move(g_map, player, key="s")
-    move(g_map, player, key="s")
-    assert not (
-        check_win(g_map, player)
-    )  # player at coordinate x=1,y=3, the coordinate of  ">" are x=2,y=2
+def test_check_win_false(g_map: Map):
+    p1 = Player(
+        1, 2
+    )  # set the player at the coordinate x=1,y=2 , where we have a "." on the map
+
+    assert not (check_win(g_map, p1))
 
 
-def test_check_win_true(g_map: Map, player: Player):
-    move(g_map, player, key="s")
-    move(g_map, player, key="d")
-    assert check_win(
-        g_map, player
-    )  # player at coordinate x=2,y=2  like  map tile = ">"
-    move(g_map, player, key="s")
-    move(g_map, player, key="a")
-    move(g_map, player, key="w")
-    move(g_map, player, key="d")
-    assert check_win(g_map, player)
+def test_check_win_true(g_map: Map):
+    p1 = Player(2, 2)  # set the player at the wining-coordinate (">")on the map
+    assert check_win(g_map, p1)  # player at coordinate x=2,y=2  like  map tile = ">"
+
+
+def test_render_player(g_map: Map, player: Player):
+    str_map = render(g_map, player)
+    tmp_map = [row for row in str_map.split("\n") if row != ""]
+    # player is as defined in @pytest.fixture for player in coordinate x=1,y=1.
+    # Here we test the position for the valid char
+    assert tmp_map[1][1] == player.char
+
+
+def test_render_field(g_map: Map, player: Player):
+    str_map = render(g_map, player)
+    tmp_map = [row for row in str_map.split("\n") if row != ""]
+    # as defined in @pytest.fixture for g_map,the map contains x=2,y=2: ">"
+    # and x=3,y=3: "." . we simply compare the render version with the original map
+    assert tmp_map[2][2] == g_map.get_tile(2, 2)
+    assert tmp_map[3][3] == g_map.get_tile(3, 3)
