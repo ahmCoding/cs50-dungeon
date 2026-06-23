@@ -2,17 +2,18 @@ import pytest
 
 from game.Map import Map
 from game.Player import Player
-from project import check_win, move, render
+from game.Tile import Tile
+from project import check_win, move, render, tile_to_char
 
 
 @pytest.fixture
 def g_map():
     my_map = [
-        ["#", "#", "#", "#", "#"],
-        ["#", ".", ".", ".", "#"],
-        ["#", ".", ">", ".", "#"],
-        ["#", ".", ".", ".", "#"],
-        ["#", "#", "#", "#", "#"],
+        [Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL],
+        [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
+        [Tile.WALL, Tile.FIELD, Tile.STAIRS, Tile.FIELD, Tile.WALL],
+        [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
+        [Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL],
     ]  # the win-tile is at coordinate x=2,y=2 , the char is ">"
     my_map = Map.get_map_obj_from_grid(my_map)
     return my_map
@@ -81,5 +82,5 @@ def test_render_field(g_map: Map, player: Player):
     tmp_map = [row for row in str_map.split("\n") if row != ""]
     # as defined in @pytest.fixture for g_map,the map contains x=2,y=2: ">"
     # and x=3,y=3: "." . we simply compare the render version with the original map
-    assert tmp_map[2][2] == g_map.get_tile(2, 2)
-    assert tmp_map[3][3] == g_map.get_tile(3, 3)
+    assert tmp_map[2][2] == tile_to_char(g_map.get_tile(2, 2))
+    assert tmp_map[3][3] == tile_to_char(g_map.get_tile(3, 3))
