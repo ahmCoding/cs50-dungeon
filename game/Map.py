@@ -73,3 +73,9 @@ class Map:
 
     def get_win_tile(self) -> str:
         return self._map_chars["stairs"]
+
+    def get_map_size(self) -> tuple[int, int]:
+        """
+        :return: width and height of the map as a tuple
+        """
+        return self._width, self._height
