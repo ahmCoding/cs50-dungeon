@@ -56,9 +56,7 @@ class Map:
         return self._map_to_string(self._map)
 
     def is_movable(self, x, y):
-        if 0 <= x < self._width and 0 <= y < self._height:
-            return self.get_tile(x, y) != self._map_chars["wall"]
-        return False
+        return self.get_tile(x, y) != self._map_chars["wall"]
 
     def get_game_map(self) -> list[list[str]]:
         return [
@@ -69,7 +67,15 @@ class Map:
         return self._map_to_string(l_map)
 
     def get_tile(self, x, y):
-        return self._map[y][x]
+        """
+        :param x: x coordinate of the tile
+        :param y: y coordinate of the tile
+        :return:  as a string
+        if the x and y are not in the map, the wall character will be returned.
+        """
+        if 0 <= x < self._width and 0 <= y < self._height:
+            return self._map[y][x]
+        return self._map_chars["wall"]
 
     def get_win_tile(self) -> str:
         return self._map_chars["stairs"]
