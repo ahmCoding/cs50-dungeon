@@ -1,10 +1,10 @@
 from game.core.map import Map
 from game.core.player import Player
 from game.core.tile import Tile
-from game.render.base import Base
+from game.render.render import Render
 
 
-class TerminalRender(Base):  # noqa: F821
+class TerminalRender(Render):
     TILE_TO_CHAR = {Tile.WALL: "#", Tile.STAIRS: ">", Tile.FIELD: "."}
     PLAYER_CHAR = "@"  # temporary char for the player
 
@@ -39,7 +39,7 @@ class TerminalRender(Base):  # noqa: F821
         tmp_map = []
         for tiles in tils_list:
             tmp_map.append(
-                [cls.tile_to_char(t) for t in tiles]  # noqa: F821
+                [cls.tile_to_char(t) for t in tiles]
             )  # convert from Tile.name to a string list
         return tmp_map
 
@@ -47,8 +47,3 @@ class TerminalRender(Base):  # noqa: F821
     def tile_to_char(cls, tile: Tile) -> str:
         """convert a tile to a string with help of a mapping dictionary"""
         return cls.TILE_TO_CHAR[tile]
-
-    @classmethod
-    def get_player_char(cls) -> str:
-        """function to return a char representing the player for test reasons"""
-        return cls.PLAYER_CHAR
