@@ -9,36 +9,26 @@ def terminal_input():
     return TerminalInput()
 
 
-def test_action_up(monkeypatch, terminal_input):
-    monkeypatch.setattr("builtins.input", lambda _: "w")
-    assert terminal_input.get_action() == Action.MOVE_UP
-
-
-def test_action_down(monkeypatch, terminal_input):
-    monkeypatch.setattr("builtins.input", lambda _: "s")
-    assert terminal_input.get_action() == Action.MOVE_DOWN
-
-
-def test_action_left(monkeypatch, terminal_input):
-    monkeypatch.setattr("builtins.input", lambda _: "a")
-    assert terminal_input.get_action() == Action.MOVE_LEFT
-
-
-def test_action_right(monkeypatch, terminal_input):
-    monkeypatch.setattr("builtins.input", lambda _: "d")
-    assert terminal_input.get_action() == Action.MOVE_RIGHT
-
-
-def test_action_quit(monkeypatch, terminal_input):
-    monkeypatch.setattr("builtins.input", lambda _: "q")
-    assert terminal_input.get_action() == Action.QUIT
+@pytest.mark.parametrize(
+    "key,expected_action",
+    [
+        ("w", Action.MOVE_UP),
+        ("s", Action.MOVE_DOWN),
+        ("d", Action.MOVE_RIGHT),
+        ("a", Action.MOVE_LEFT),
+        ("q", Action.QUIT),
+    ],
+)
+def test_action_movement(monkeypatch, terminal_input, key, expected_action):
+    monkeypatch.setattr("builtins.input", lambda _: key)
+    assert terminal_input.get_action() == expected_action
 
 
 @pytest.mark.parametrize(
     "key,expected",
     [
         ("g", Action.NONE),
-        ("w", Action.MOVE_UP),
+        ("2", Action.NONE),
         ("ss", Action.NONE),
     ],
 )
