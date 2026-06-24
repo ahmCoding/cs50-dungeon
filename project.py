@@ -1,8 +1,7 @@
-from input.action import Action
-from input.terminal import TerminalInput
-
 from game.core.map import Map
 from game.core.player import Player
+from game.input.action import Action
+from game.input.terminal import TerminalInput
 from game.render.terminal import TerminalRenderer
 
 
@@ -30,6 +29,7 @@ def main():
     player = Player(1, 1)
     t_render = TerminalRenderer()
     t_input = TerminalInput()
+    print("w: up , s: down , a: left, d: right, q for quit")
     while True:
         t_render.draw(g_map, player)
         if check_win(g_map, player):

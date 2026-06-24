@@ -1,6 +1,7 @@
 import pytest
-from input.action import Action
-from input.terminal import TerminalInput
+
+from game.input.action import Action
+from game.input.terminal import TerminalInput
 
 
 @pytest.fixture
@@ -33,8 +34,14 @@ def test_action_quit(monkeypatch, terminal_input):
     assert terminal_input.get_action() == Action.QUIT
 
 
-def test_action_none(monkeypatch, terminal_input):
-    monkeypatch.setattr("builtins.input", lambda _: "h")
-    monkeypatch.setattr("builtins.input", lambda _: "gg")
-    monkeypatch.setattr("builtins.input", lambda _: "12")
-    assert terminal_input.get_action() == Action.NONE
+@pytest.mark.parametrize(
+    "key,expected",
+    [
+        ("g", Action.NONE),
+        ("w", Action.MOVE_UP),
+        ("ss", Action.NONE),
+    ],
+)
+def test_action_none(monkeypatch, terminal_input, key, expected):
+    monkeypatch.setattr("builtins.input", lambda _: key)
+    assert terminal_input.get_action() == expected

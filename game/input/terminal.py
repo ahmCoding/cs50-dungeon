@@ -1,5 +1,5 @@
-from input.action import Action
-from input.base import InputSource
+from game.input.action import Action
+from game.input.base import InputSource
 
 
 class TerminalInput(InputSource):
@@ -12,7 +12,6 @@ class TerminalInput(InputSource):
     }
 
     def get_action(self) -> Action:
-        print("w: up , s: down , a: left, d: right, :q for quit")
         user_i = input("Action: ").lower()
         try:
             action = self.STR_TO_ACTION[user_i]
