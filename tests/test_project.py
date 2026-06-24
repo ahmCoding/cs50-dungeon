@@ -1,8 +1,8 @@
 import pytest
 
-from game.Map import Map
-from game.Player import Player
-from game.Tile import Tile
+from game.core.Map import Map
+from game.core.Player import Player
+from game.core.Tile import Tile
 from project import check_win, move, render, tile_to_char
 
 

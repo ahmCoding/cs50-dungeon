@@ -1,6 +1,6 @@
 import pytest
 
-from game.Player import Player
+from game.core.Player import Player
 
 
 @pytest.fixture
