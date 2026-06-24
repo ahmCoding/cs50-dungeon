@@ -30,7 +30,7 @@ def player():
 def test_move_to_right_wall(g_map: Map, player: Player):
     m_width, _ = g_map.get_map_size()
     for x in range(m_width):
-        move(g_map, player, key="d")
+        move(g_map, player, Player.Direction.RIGHT)
     assert (
         player.x == m_width - 2
     )  # range from 0 to m_width-1 and subtraction -1 for the wall
@@ -39,21 +39,21 @@ def test_move_to_right_wall(g_map: Map, player: Player):
 def test_move_to_left_wall(g_map: Map, player: Player):
     m_width, _ = g_map.get_map_size()
     for x in range(m_width):
-        move(g_map, player, key="a")
+        move(g_map, player, Player.Direction.LEFT)
     assert player.x == 1  # left wall x=0 , so the player is allowed only to x=1
 
 
 def test_move_to_upper_wall(g_map: Map, player: Player):
     _, m_height = g_map.get_map_size()
     for y in range(m_height):
-        move(g_map, player, key="w")
+        move(g_map, player, Player.Direction.UP)
     assert player.y == 1
 
 
 def test_move_to_lower_wall(g_map: Map, player: Player):
     _, m_height = g_map.get_map_size()
     for y in range(m_height):
-        move(g_map, player, key="s")
+        move(g_map, player, Player.Direction.DOWN)
     assert player.y == m_height - 2
 
 
