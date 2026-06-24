@@ -3,7 +3,8 @@ import pytest
 from game.core.Map import Map
 from game.core.Player import Player
 from game.core.Tile import Tile
-from project import check_win, move, render, tile_to_char
+from game.render.utils import get_player_char, render, tile_to_char
+from project import check_win, move
 
 
 @pytest.fixture
@@ -74,7 +75,7 @@ def test_render_player(g_map: Map, player: Player):
     tmp_map = [row for row in str_map.split("\n") if row != ""]
     # player is as defined in @pytest.fixture for player in coordinate x=1,y=1.
     # Here we test the position for the valid char
-    assert tmp_map[1][1] == player.char
+    assert tmp_map[1][1] == get_player_char()
 
 
 def test_render_field(g_map: Map, player: Player):
