@@ -3,7 +3,9 @@ import pytest
 from game.core.map import Map
 from game.core.player import Player
 from game.core.tile import Tile
-from game.render.terminal import get_player_char, render, tile_to_char
+from game.render.terminal import TerminalRender
+
+# from game.render.terminal_past import get_player_char, render, tile_to_char
 from project import check_win, move
 
 
@@ -71,17 +73,19 @@ def test_check_win_true(g_map: Map):
 
 
 def test_render_player(g_map: Map, player: Player):
-    str_map = render(g_map, player)
+    t_render = TerminalRender()
+    str_map = t_render.to_string(g_map, player)
     tmp_map = [row for row in str_map.split("\n") if row != ""]
     # player is as defined in @pytest.fixture for player in coordinate x=1,y=1.
     # Here we test the position for the valid char
-    assert tmp_map[1][1] == get_player_char()
+    assert tmp_map[1][1] == TerminalRender.get_player_char()
 
 
 def test_render_field(g_map: Map, player: Player):
-    str_map = render(g_map, player)
+    t_render = TerminalRender()
+    str_map = t_render.to_string(g_map, player)
     tmp_map = [row for row in str_map.split("\n") if row != ""]
     # as defined in @pytest.fixture for g_map,the map contains x=2,y=2: ">"
     # and x=3,y=3: "." . we simply compare the render version with the original map
-    assert tmp_map[2][2] == tile_to_char(g_map.get_tile(2, 2))
-    assert tmp_map[3][3] == tile_to_char(g_map.get_tile(3, 3))
+    assert tmp_map[2][2] == TerminalRender.tile_to_char(g_map.get_tile(2, 2))
+    assert tmp_map[3][3] == TerminalRender.tile_to_char(g_map.get_tile(3, 3))
