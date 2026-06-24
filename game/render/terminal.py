@@ -1,10 +1,10 @@
 from game.core.map import Map
 from game.core.player import Player
 from game.core.tile import Tile
-from game.render.render import Render
+from game.render.base import Renderer
 
 
-class TerminalRender(Render):
+class TerminalRenderer(Renderer):
     TILE_TO_CHAR = {Tile.WALL: "#", Tile.STAIRS: ">", Tile.FIELD: "."}
     PLAYER_CHAR = "@"  # temporary char for the player
 

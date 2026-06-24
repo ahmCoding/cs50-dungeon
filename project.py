@@ -1,6 +1,6 @@
 from game.core.map import Map
 from game.core.player import Player
-from game.render.terminal import TerminalRender
+from game.render.terminal import TerminalRenderer
 
 
 def move(g_map: Map, player: Player, key: str):
@@ -28,7 +28,7 @@ def main():
     print("w: up , s: down , a: left, d: right, :q for quit")
     g_map = Map.get_map_obj(12, 8)
     player = Player(1, 1)
-    t_render = TerminalRender()
+    t_render = TerminalRenderer()
     while True:
         t_render.draw(g_map, player)
         if check_win(g_map, player):
