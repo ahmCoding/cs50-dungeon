@@ -1,7 +1,7 @@
 import random
 from typing import Self
 
-from game.core.Tile import Tile
+from game.core.tile import Tile
 
 
 class Map:

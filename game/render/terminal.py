@@ -1,6 +1,6 @@
-from game.core.Map import Map
-from game.core.Player import Player
-from game.core.Tile import Tile
+from game.core.map import Map
+from game.core.player import Player
+from game.core.tile import Tile
 
 TILE_TO_CHAR = {Tile.WALL: "#", Tile.STAIRS: ">", Tile.FIELD: "."}
 PLAYER_CHAR = "@"  # temporary char for the player

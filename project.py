@@ -1,6 +1,6 @@
-from game.core.Map import Map
-from game.core.Player import Player
-from game.render.utils import render
+from game.core.map import Map
+from game.core.player import Player
+from game.render.terminal import render
 
 
 def move(g_map: Map, player: Player, key: str):
