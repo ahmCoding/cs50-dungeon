@@ -1,12 +1,12 @@
 import pytest
 
 from game.input.action import Action
-from game.input.cbreak_terminal import CbreakTerminal
+from game.input.canonical_terminal import CanonicalTerminal
 
 
 @pytest.fixture
 def terminal_input():
-    return CbreakTerminal()
+    return CanonicalTerminal()
 
 
 @pytest.mark.parametrize(
