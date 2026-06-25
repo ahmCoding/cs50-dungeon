@@ -19,7 +19,7 @@ def terminal_input():
         ("q", Action.QUIT),
     ],
 )
-def test_action_movement(monkeypatch, terminal_input, key, expected_action):
+def test_key_to_action(monkeypatch, terminal_input, key, expected_action):
     monkeypatch.setattr("builtins.input", lambda _: key)
     assert terminal_input.get_action() == expected_action
 
