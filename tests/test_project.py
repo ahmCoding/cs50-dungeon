@@ -4,9 +4,9 @@ from game.core.map import Map
 from game.core.player import Player
 from game.core.tile import Tile
 from game.input.action import Action
-from game.input.scriptedTerminal import ScriptedTerminal
+from game.input.scripted import ScriptedTerminal
 from game.render.terminal import TerminalRenderer
-from project import ACTION_TO_DIRECTION, check_win, move
+from project import check_win, move, play
 
 
 @pytest.fixture
@@ -94,16 +94,20 @@ def test_render_field(g_map: Map, player: Player, t_renderer: TerminalRenderer):
     assert tmp_map[3][3] == TerminalRenderer.tile_to_char(g_map.get_tile(3, 3))
 
 
-def test_game_loop(g_map: Map, player: Player):
+def test_play(
+    g_map: Map,
+    player: Player,
+    t_renderer: TerminalRenderer,
+):
     """
     double move to right , current pos of player is (x:1,y:1) after the double
     right action should be (x:3,y:1)
     """
-    scripted_actions = ScriptedTerminal(
+    scripted_input = ScriptedTerminal(
         [Action.MOVE_RIGHT, Action.MOVE_RIGHT, Action.QUIT]
     )
     y_before_actions = player.y
-    while (action := scripted_actions.get_action()) != Action.QUIT:
-        move(g_map, player, ACTION_TO_DIRECTION[action])
+    play(g_map, player, scripted_input, t_renderer)
+
     assert player.x == 3 and player.y == y_before_actions
-    assert action == Action.QUIT
+    assert scripted_input.current_action == Action.QUIT

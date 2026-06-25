@@ -1,6 +1,7 @@
 from game.core.map import Map
 from game.core.player import Player
 from game.input.action import Action
+from game.input.base import InputSource
 from game.input.terminal import TerminalInput
 from game.render.terminal import TerminalRenderer
 
@@ -24,23 +25,29 @@ ACTION_TO_DIRECTION = {
 }
 
 
+def play(
+    g_map: Map, player: Player, in_source: InputSource, t_render: TerminalRenderer
+) -> None:
+    while True:
+        t_render.draw(g_map, player)
+        if check_win(g_map, player):
+            print("*" * 9 + " Game Won  " + "*" * 9)
+            break
+        user_action = in_source.get_action()
+        if user_action == Action.QUIT:
+            break
+        if user_action == Action.NONE:
+            continue
+        move(g_map, player, ACTION_TO_DIRECTION[user_action])
+
+
 def main():
     g_map = Map.get_map_obj(12, 8)
     player = Player(1, 1)
     t_render = TerminalRenderer()
     t_input = TerminalInput()
     print("w: up , s: down , a: left, d: right, q for quit")
-    while True:
-        t_render.draw(g_map, player)
-        if check_win(g_map, player):
-            print("*" * 9 + " Game Won  " + "*" * 9)
-            break
-        user_action = t_input.get_action()
-        if user_action == Action.QUIT:
-            break
-        if user_action == Action.NONE:
-            continue
-        move(g_map, player, ACTION_TO_DIRECTION[user_action])
+    play(g_map, player, t_input, t_render)
 
 
 if __name__ == "__main__":

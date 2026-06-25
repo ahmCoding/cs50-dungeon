@@ -10,6 +10,8 @@ class ScriptedTerminal(InputSource):
 
     def __init__(self, actions: list[Action]):
         self.actions = iter(actions)
+        self.current_action = None
 
     def get_action(self) -> Action:
-        return next(self.actions)
+        self.current_action = next(self.actions)
+        return self.current_action
