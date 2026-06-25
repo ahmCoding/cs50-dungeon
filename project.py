@@ -4,7 +4,7 @@ from game.core.map import Map
 from game.core.player import Player
 from game.input.action import Action
 from game.input.base import InputSource
-from game.input.raw_terminal import RawTerminalInput
+from game.input.raw_terminal import RawTerminal
 from game.render.base import Renderer
 from game.render.terminal import TerminalRenderer
 
@@ -46,7 +46,7 @@ def play(
 
 def main():
     fd = sys.stdin.fileno()  # raw input mode
-    raw_terminal_input = RawTerminalInput(fd)
+    raw_terminal_input = RawTerminal(fd)
 
     g_map = Map.get_map_obj(12, 8)
     player = Player(1, 1)

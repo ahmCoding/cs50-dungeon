@@ -6,7 +6,7 @@ from game.input.action import Action
 from game.input.terminal import TerminalInput
 
 
-class RawTerminalInput(TerminalInput):
+class RawTerminal(TerminalInput):
     def __init__(self, fd):
         self.fd = fd
         self.old_tty_state = []
