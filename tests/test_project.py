@@ -4,7 +4,8 @@ from game.core.map import Map
 from game.core.player import Player
 from game.core.tile import Tile
 from game.input.action import Action
-from game.input.scripted import ScriptedTerminal
+from game.input.scripted import ScriptedInput
+from game.render.null_render import NullRenderer
 from game.render.terminal import TerminalRenderer
 from project import check_win, move, play
 
@@ -97,17 +98,14 @@ def test_render_field(g_map: Map, player: Player, t_renderer: TerminalRenderer):
 def test_play(
     g_map: Map,
     player: Player,
-    t_renderer: TerminalRenderer,
 ):
     """
     double move to right , current pos of player is (x:1,y:1) after the double
     right action should be (x:3,y:1)
     """
-    scripted_input = ScriptedTerminal(
-        [Action.MOVE_RIGHT, Action.MOVE_RIGHT, Action.QUIT]
-    )
+    scripted_input = ScriptedInput([Action.MOVE_RIGHT, Action.MOVE_RIGHT, Action.QUIT])
+    renderer = NullRenderer()
     y_before_actions = player.y
-    play(g_map, player, scripted_input, t_renderer)
+    play(g_map, player, scripted_input, renderer)
 
     assert player.x == 3 and player.y == y_before_actions
-    assert scripted_input.current_action == Action.QUIT

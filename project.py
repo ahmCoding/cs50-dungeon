@@ -3,7 +3,7 @@ from game.core.player import Player
 from game.input.action import Action
 from game.input.base import InputSource
 from game.input.terminal import TerminalInput
-from game.render.terminal import TerminalRenderer
+from game.render.terminal import Renderer, TerminalRenderer
 
 
 def move(g_map: Map, player: Player, p_direction: Player.Direction):
@@ -26,10 +26,10 @@ ACTION_TO_DIRECTION = {
 
 
 def play(
-    g_map: Map, player: Player, in_source: InputSource, t_render: TerminalRenderer
+    g_map: Map, player: Player, in_source: InputSource, renderer: Renderer
 ) -> None:
     while True:
-        t_render.draw(g_map, player)
+        renderer.draw(g_map, player)
         if check_win(g_map, player):
             print("*" * 9 + " Game Won  " + "*" * 9)
             break
