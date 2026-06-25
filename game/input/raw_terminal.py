@@ -9,7 +9,7 @@ from game.input.terminal import TerminalInput
 class RawTerminalInput(TerminalInput):
     def __init__(self, fd):
         self.fd = fd
-        self.old_tty = []
+        self.old_tty_state = []
 
     def __enter__(self):
         """
@@ -17,7 +17,8 @@ class RawTerminalInput(TerminalInput):
         and we don't want a complex key-mapping with keys like arrows etc., the priority
         ist the cross-platform ability of the game
         """
-        self.old_tty_state = tty.setraw(
+        self.old_tty_state = termios.tcgetattr(self.fd)
+        tty.setraw(
             self.fd, termios.TCSADRAIN
         )  # transmit all output, but keep the inputted char
 
