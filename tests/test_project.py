@@ -5,7 +5,7 @@ from game.core.player import Player
 from game.core.tile import Tile
 from game.input.action import Action
 from game.input.scripted import ScriptedInput
-from game.render.null_render import NullRenderer
+from game.render.null import NullRenderer
 from game.render.terminal import TerminalRenderer
 from project import check_win, move, play
 

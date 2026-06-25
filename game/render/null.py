@@ -5,7 +5,7 @@ from game.render.base import Renderer
 
 class NullRenderer(Renderer):
     """
-    this class is user mainly for test purposes
+    this class is used mainly for test purposes
     """
 
     def draw(self, g_map: Map, player: Player) -> None:

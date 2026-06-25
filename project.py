@@ -3,7 +3,8 @@ from game.core.player import Player
 from game.input.action import Action
 from game.input.base import InputSource
 from game.input.terminal import TerminalInput
-from game.render.terminal import Renderer, TerminalRenderer
+from game.render.base import Renderer
+from game.render.terminal import TerminalRenderer
 
 
 def move(g_map: Map, player: Player, p_direction: Player.Direction):
