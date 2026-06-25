@@ -13,8 +13,11 @@ class TerminalInput(InputSource):
 
     def get_action(self) -> Action:
         user_i = input("Action: ").lower()
+        return self.map_str_to_action(user_i)
+
+    def map_str_to_action(self, char: str) -> Action:
         try:
-            action = self.STR_TO_ACTION[user_i]
+            action = self.STR_TO_ACTION[char]
         except KeyError:
             return Action.NONE
         return action
