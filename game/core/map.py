@@ -31,9 +31,7 @@ class Map:
         while True:
             r_x = random.randint(1, self._width - 2)  # random x-pos for stairs
             r_y = random.randint(1, self._height - 2)  # random y-pos for stairs
-            if (
-                r_x != self._start_position[0] and r_y != self._start_position[1]
-            ):  # make sure, the stairs-pos is not the start pos of map
+            if (r_x, r_y) != self._start_position:  # no stairs at map start pos
                 break
         tmp_map = [[Tile.WALL for w in range(self._width)] for h in range(self._height)]
         # only write somewhere in the middle of field
