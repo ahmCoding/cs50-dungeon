@@ -38,6 +38,14 @@ ACTION_TO_DIRECTION = {
 }
 
 
+def descent(g_dungeon: Dungeon, player: Player) -> None:
+    """
+    descent to the deeper map and set the player on the start position of the map
+    """
+    g_dungeon.next_map()
+    player.set_position(*g_dungeon.get_current_map().get_start_position())
+
+
 def play(
     g_dungeon: Dungeon, player: Player, in_source: InputSource, renderer: Renderer
 ) -> None:
@@ -58,8 +66,7 @@ def play(
         # next map
         if check_stairs(g_dungeon.get_current_map(), player):
             if not g_dungeon.is_last_map():
-                g_dungeon.next_map()
-                player.set_position(*g_dungeon.get_current_map().get_start_position())
+                descent(g_dungeon, player)
 
 
 def main():
