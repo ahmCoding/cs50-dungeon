@@ -5,7 +5,7 @@ import tty
 class RawMode:
     """
     The reason for raw mode is to have an immediate response to a pressed key in
-    game without the conformation(enter/no buffering). The game can be closed
+    game without the confirmation(enter/no buffering). The game can be closed
     with 'q',so we don't need the cbreak (Ctrl+C) as exit option.
     """
 
@@ -16,7 +16,7 @@ class RawMode:
     def __enter__(self):
         """
         :return : we return the self object , even though there is no function to
-        use with ist.
+        use with it.
         """
         self.old_tty_state = termios.tcgetattr(self.fd)
         tty.setraw(

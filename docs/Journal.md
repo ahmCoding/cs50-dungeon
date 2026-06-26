@@ -153,5 +153,79 @@ it). Pass raw keys into the core (that would glue the core to the terminal).
 
 ---
 
-*Next entry: `v0.5` — event-driven input (`RawTerminalInput`). Added on its own
-branch when the milestone is done.*
+## v0.5 — Event Input (single key, raw mode) (2026-06-26)
+
+*Tag: `v0.5-event-input` (milestone: event-driven input)*
+
+**Context.** Until v0.4 the player typed a letter and then pressed Enter
+(canonical mode). For a game this is slow — one move needs two key presses. The
+goal of v0.5: **one key press = one turn**, with no Enter. The game stays
+turn-based (one move per press; auto-repeat on hold is left for later).
+
+**Decision.** Add a new `InputSource` that reads a single *raw* byte from the
+terminal, using only the standard library (`termios` + `tty`). The low-level
+key code is locked inside this new class; the loop, core, and renderer do not
+change. In detail:
+
+- `TerminalInput` becomes an abstract *middle* class (child of `InputSource`,
+  parent of the concrete terminal classes) and holds the shared
+  `STR_TO_ACTION` table.
+- The old line-based class is renamed `CanonicalTerminal` — an honest name, it
+  runs in canonical mode.
+- The new `RawTerminal` reads one byte in raw mode.
+- The raw on/off logic is pulled out into its own context manager `RawMode` in
+  `game/input/raw_mode.py`. `RawTerminal` *uses* it (composition); it does not
+  *inherit* it.
+
+**Why.**
+
+- *Stdlib over a library* (`termios`/`tty` instead of e.g. `readchar`): the goal
+  of the whole project is learning. Building raw mode by hand shows the terminal
+  from the inside, and keeps `requirements.txt` empty (zero dependencies).
+- *Snapshot, not guess*: `RawMode.__enter__` saves the current terminal settings
+  with `tcgetattr` and restores exactly them with `tcsetattr`. It does not reset
+  to a "default" — it puts back whatever was there before. This is robust for any
+  starting state and does not depend on the Python version.
+- *Guaranteed cleanup*: a `with` block is a `try/finally` in disguise. Even if
+  the read raises (or the program crashes mid-read), the terminal is set back to
+  normal. Without this, a crash would leave the shell broken (no Enter, no echo).
+- *Information hiding through a per-call lifecycle*: raw mode is switched on and
+  off *inside* each `get_action()` call. So `main()` never learns that a raw mode
+  exists — it only sees an `InputSource`. The contract stays at one method
+  (`get_action`); no `start()`/`stop()` is needed. This is cheap here because the
+  game is turn-based (a few reads per second, not thousands).
+- *Single Responsibility / composition over inheritance*: `RawMode` knows only
+  "switch the tty to raw and back"; `RawTerminal` knows only "give the next
+  Action". The input class *has* a mode switch instead of *being* one.
+- *Three honest levels*: `InputSource` (neutral contract, no terminal knowledge)
+  → `TerminalInput` (reads characters from the keyboard, holds the table) →
+  `CanonicalTerminal` / `RawTerminal` (differ only in *how* they read). Shared
+  knowledge lives in the shared parent, not copied into the siblings (DRY).
+
+**Raw vs. cbreak.** Both modes give single bytes with no Enter. The only real
+difference is `Ctrl+C`: cbreak keeps it as a kill signal, raw delivers it as a
+plain byte. We chose **raw** on purpose — the game is left with `q` as the exit,
+and we want full control of the keys; `Ctrl+C` is not needed as an escape. This
+has nothing to do with cross-platform support (both are POSIX only).
+
+**Windows.** `termios` is POSIX only, so `RawTerminal` runs on Linux and macOS,
+not on Windows. We leave the door open: a future `WindowsInput` (using `msvcrt`)
+would be a *new* `InputSource`, added next to the others — no rewrite, because
+the seam already sits in the right place. We do not write untested Windows code
+now (YAGNI, and never ship code you cannot run).
+
+**Rejected.**
+
+- A small library like `readchar` (one line, works everywhere at once) — it
+  would hide exactly the part we want to learn, and add a dependency.
+- Arrow keys — they send multi-byte escape sequences; we keep single letters
+  (`w/a/s/d/q`), so this complexity is avoided. (This is a separate choice from
+  raw vs. cbreak.)
+- Replacing `CanonicalTerminal` with the new class — it is still a valid,
+  portable, easy-to-test `InputSource` and a natural fallback. Additive design.
+- A session lifecycle in `main()` (raw on at start, off at end) — it would leak
+  a detail of `RawTerminal` to the caller and force a bigger interface.
+
+---
+
+*Next entry: `v0.6` — added on its own branch when the milestone is done.*
