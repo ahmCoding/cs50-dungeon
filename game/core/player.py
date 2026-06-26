@@ -2,6 +2,10 @@ from enum import Enum
 
 
 class Player:
+    """
+    this class represents a player in the game
+    """
+
     class Direction(Enum):
         """
         The Enum representing the direction of the player.

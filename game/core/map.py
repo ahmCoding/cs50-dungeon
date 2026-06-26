@@ -5,6 +5,10 @@ from game.core.tile import Tile
 
 
 class Map:
+    """
+    this class represents a map in the game
+    """
+
     def __init__(self, w: int = 5, h: int = 5):
         """
         :param w: width of the map /x
