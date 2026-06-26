@@ -17,7 +17,7 @@ class Map:
         self._height = h
         self._width = w
         self._map = []
-        self._win_tile = Tile.STAIRS
+        self._stairs_tile = Tile.STAIRS
 
     def _create_map(self):
         r_x = random.randint(1, self._width - 2)
@@ -67,8 +67,8 @@ class Map:
             return self._map[y][x]
         return Tile.WALL
 
-    def get_win_tile(self) -> Tile:
-        return self._win_tile
+    def get_stairs_tile(self) -> Tile:
+        return self._stairs_tile
 
     def get_map_size(self) -> tuple[int, int]:
         """

@@ -1,5 +1,6 @@
 import sys
 
+from game.core.dungeon import Dungeon
 from game.core.map import Map
 from game.core.player import Player
 from game.input.action import Action
@@ -15,8 +16,17 @@ def move(g_map: Map, player: Player, p_direction: Player.Direction):
         player.move(p_direction)
 
 
-def check_win(g_map: Map, player: Player) -> bool:
-    return g_map.get_tile(player.x, player.y) == g_map.get_win_tile()
+def is_won(g_dungeon: Dungeon, player: Player) -> bool:
+    if g_dungeon.is_last_map():
+        return check_stairs(g_dungeon.get_current_map(), player)
+    return False
+
+
+def check_stairs(g_map: Map, player: Player) -> bool:
+    """
+    :return: True if the player is on a stairs tile
+    """
+    return g_map.get_tile(player.x, player.y) == g_map.get_stairs_tile()
 
 
 # to map ACTION to Player.Direction
@@ -29,11 +39,14 @@ ACTION_TO_DIRECTION = {
 
 
 def play(
-    g_map: Map, player: Player, in_source: InputSource, renderer: Renderer
+    g_dungeon: Dungeon, player: Player, in_source: InputSource, renderer: Renderer
 ) -> None:
     while True:
-        renderer.draw(g_map, player)
-        if check_win(g_map, player):
+        renderer.draw(g_dungeon.get_current_map(), player)
+
+        # the player has won the game , if he is on the last
+        # map and on a stairs tile
+        if is_won(g_dungeon, player):
             print("*" * 9 + " Game Won  " + "*" * 9)
             break
         user_action = in_source.get_action()
@@ -41,19 +54,25 @@ def play(
             break
         if user_action == Action.NONE:
             continue
-        move(g_map, player, ACTION_TO_DIRECTION[user_action])
+        move(g_dungeon.get_current_map(), player, ACTION_TO_DIRECTION[user_action])
+        # next map
+        if check_stairs(g_dungeon.get_current_map(), player):
+            if not g_dungeon.is_last_map():
+                g_dungeon.next_map()
 
 
 def main():
     fd = sys.stdin.fileno()  # raw input mode
     raw_terminal_input = RawTerminal(fd)
 
-    g_map = Map.get_map_obj(12, 8)
+    g_map1 = Map.get_map_obj(12, 8)
+    g_map2 = Map.get_map_obj(12, 8)
+    g_dungeon = Dungeon([g_map1, g_map2])
     player = Player(1, 1)
     t_render = TerminalRenderer()
     # t_input = TerminalInput()
     print("w: up , s: down , a: left, d: right, q for quit")
-    play(g_map, player, raw_terminal_input, t_render)
+    play(g_dungeon, player, raw_terminal_input, t_render)
 
 
 if __name__ == "__main__":

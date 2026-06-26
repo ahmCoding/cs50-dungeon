@@ -1,5 +1,6 @@
 import pytest
 
+from game.core.dungeon import Dungeon
 from game.core.map import Map
 from game.core.player import Player
 from game.core.tile import Tile
@@ -7,7 +8,7 @@ from game.input.action import Action
 from game.input.scripted import ScriptedInput
 from game.render.null import NullRenderer
 from game.render.terminal import TerminalRenderer
-from project import check_win, move, play
+from project import is_won, move, play
 
 
 @pytest.fixture
@@ -69,13 +70,14 @@ def test_check_win_false(g_map: Map):
     p1 = Player(
         1, 2
     )  # set the player at the coordinate x=1,y=2 , where we have a "." on the map
-
-    assert not (check_win(g_map, p1))
+    g_dungeon = Dungeon([g_map])
+    assert not (is_won(g_dungeon, p1))
 
 
 def test_check_win_true(g_map: Map):
     p1 = Player(2, 2)  # set the player at the wining-coordinate (">")on the map
-    assert check_win(g_map, p1)  # player at coordinate x=2,y=2  like  map tile = ">"
+    g_dungeon = Dungeon([g_map])
+    assert is_won(g_dungeon, p1)  # player at coordinate x=2,y=2  like  map tile = ">"
 
 
 def test_render_player(g_map: Map, player: Player, t_renderer: TerminalRenderer):
@@ -103,9 +105,10 @@ def test_play(
     double move to right , current pos of player is (x:1,y:1) after the double
     right action should be (x:3,y:1)
     """
+    g_dungeon = Dungeon([g_map])
     scripted_input = ScriptedInput([Action.MOVE_RIGHT, Action.MOVE_RIGHT, Action.QUIT])
     renderer = NullRenderer()
     y_before_actions = player.y
-    play(g_map, player, scripted_input, renderer)
+    play(g_dungeon, player, scripted_input, renderer)
 
     assert player.x == 3 and player.y == y_before_actions
