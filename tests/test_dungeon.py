@@ -34,37 +34,34 @@ def g_dungeon(g_map1: Map, g_map2: Map):
     return Dungeon([g_map1, g_map2])
 
 
-def test_first_map_after_start(g_dungeon: Dungeon, g_map1: Map):
-    """2 maps in dungeon obj, current map ist the first one"""
+def test_get_current_map_after_start(g_dungeon: Dungeon, g_map1: Map):
+    """after start  the current map should be the first one is"""
     assert g_dungeon.get_current_map() == g_map1
 
 
 def test_next_map(g_dungeon: Dungeon, g_map2: Map):
-    """2 maps in dungeon obj, current map ist the first one,
-    after 1.time obj.next_map() call, the current map should be
-    the second one"""
+    """after calling obj.next_map() for one time, the second map should be
+    the current one"""
     g_dungeon.next_map()
     assert g_dungeon.get_current_map() == g_map2
 
 
-def test_is_last_map_after_start(g_dungeon: Dungeon):
-    """2 maps in dungeon obj, current map ist the first one"""
+def test_is_last_map_false(g_dungeon: Dungeon):
+    """after start the current map should not be the last one"""
     assert not g_dungeon.is_last_map()
 
 
-def test_is_last_map(g_dungeon: Dungeon, g_map2: Map):
-    """2 maps in dungeon obj, current map ist the first one
-    after 1.time of obj.next_map() call, the current map should
-    still be the last one
-    """
+def test_is_last_map_true(g_dungeon: Dungeon, g_map2: Map):
+    """after calling obj.next_map() for one time, the second map should be
+    the last one"""
     g_dungeon.next_map()
     assert g_dungeon.is_last_map()
 
 
-def test_is_next_map(g_dungeon: Dungeon, g_map2: Map):
-    """2 maps in dungeon obj, current map ist the first one
-    after x.times (x>1) of obj.next_map() call, the current map should
-    still be the second one
+def test_next_map_extreme(g_dungeon: Dungeon, g_map2: Map):
+    """after start and calling obj.next_map() for x.times (x>1) of ,
+    the current map should still be the second one. even though the
+    obj.next_map() was called more the once
     """
     g_dungeon.next_map()
     g_dungeon.next_map()
