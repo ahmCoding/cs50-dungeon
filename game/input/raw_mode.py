@@ -3,17 +3,20 @@ import tty
 
 
 class RawMode:
+    """
+    The reason for raw mode is to have an immediate response to a pressed key in
+    game without the conformation(enter/no buffering). The game can be closed
+    with 'q',so we don't need the cbreak (Ctrl+C) as exit option.
+    """
+
     def __init__(self, fd: int):
         self.fd = fd
         self.old_tty_state = []
 
     def __enter__(self):
         """
-         we are using 'raw' and not 'cbreak',because the user can quit the game with "q"
-        and we don't want a complex key-mapping with keys like arrows etc., the priority
-        ist the cross-platform ability of the game
-        we don't need it as this context manager doesn't offer a
-        function beside '__enter__ ' and '__exit__'
+        :return : we return the self object , even though there is no function to
+        use with ist.
         """
         self.old_tty_state = termios.tcgetattr(self.fd)
         tty.setraw(
