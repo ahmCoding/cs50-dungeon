@@ -20,7 +20,7 @@ def g_map1():
         [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
         [Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL],
     ]
-    return Map().get_map_obj_from_grid(map1)
+    return Map().get_map_obj_from_grid(map1, (1, 1))
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def g_map2():
         [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
         [Tile.WALL, Tile.WALL, Tile.WALL, Tile.STAIRS, Tile.WALL],
     ]
-    return Map().get_map_obj_from_grid(map2)
+    return Map().get_map_obj_from_grid(map2, (1, 1))
 
 
 @pytest.fixture

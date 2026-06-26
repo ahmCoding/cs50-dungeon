@@ -59,6 +59,7 @@ def play(
         if check_stairs(g_dungeon.get_current_map(), player):
             if not g_dungeon.is_last_map():
                 g_dungeon.next_map()
+                player.set_position(*g_dungeon.get_current_map().get_start_position())
 
 
 def main():

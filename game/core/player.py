@@ -34,3 +34,13 @@ class Player:
     def next_position(self, direction: Direction) -> tuple[int, int]:
         dx, dy = direction.value
         return self.x + dx, self.y + dy
+
+    def set_position(self, x: int, y: int) -> None:
+        self.x = x
+        self.y = y
+
+    def get_position(self) -> tuple[int, int]:
+        """
+        :return: (x, y)
+        """
+        return self.x, self.y

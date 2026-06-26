@@ -20,7 +20,7 @@ def g_map():
         [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
         [Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL],
     ]
-    return Map().get_map_obj_from_grid(map1)
+    return Map().get_map_obj_from_grid(map1, (1, 1))
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def g_map2():
         [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
         [Tile.WALL, Tile.WALL, Tile.WALL, Tile.STAIRS, Tile.WALL],
     ]
-    return Map().get_map_obj_from_grid(map2)
+    return Map().get_map_obj_from_grid(map2, (1, 1))
 
 
 @pytest.fixture
@@ -95,7 +95,7 @@ def test_player_game_not_won(g_dungeon: Dungeon):
     assert not is_won(g_dungeon, p1)
 
 
-def test_check_win_true(g_dungeon: Dungeon):
+def test_is_won_true(g_dungeon: Dungeon):
     """we set the player on the wining coordinate, second map x=3,y=4"""
     g_dungeon.next_map()
     p1 = Player(3, 4)
