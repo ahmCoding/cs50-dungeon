@@ -1,8 +1,10 @@
+import sys
+
 from game.core.map import Map
 from game.core.player import Player
 from game.input.action import Action
 from game.input.base import InputSource
-from game.input.terminal import TerminalInput
+from game.input.raw_terminal import RawTerminal
 from game.render.base import Renderer
 from game.render.terminal import TerminalRenderer
 
@@ -43,12 +45,15 @@ def play(
 
 
 def main():
+    fd = sys.stdin.fileno()  # raw input mode
+    raw_terminal_input = RawTerminal(fd)
+
     g_map = Map.get_map_obj(12, 8)
     player = Player(1, 1)
     t_render = TerminalRenderer()
-    t_input = TerminalInput()
+    # t_input = TerminalInput()
     print("w: up , s: down , a: left, d: right, q for quit")
-    play(g_map, player, t_input, t_render)
+    play(g_map, player, raw_terminal_input, t_render)
 
 
 if __name__ == "__main__":
