@@ -4,6 +4,12 @@ from game.core.dungeon import Dungeon
 from game.core.map import Map
 from game.core.tile import Tile
 
+"""
+In some of tests we are comparing Map-objects with help of '==' operator.
+This operator is not defined in Map-class , but the default behaviour ('is')
+is sufficient for us. 
+"""
+
 
 @pytest.fixture
 def g_map1():

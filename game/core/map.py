@@ -19,15 +19,6 @@ class Map:
         self._map = []
         self._win_tile = Tile.STAIRS
 
-    def __eq__(self, other):
-        """
-        this function reflects the same behavior as Object.__eq__ , but
-        the reason write it is to be aware of the consequences
-        """
-        if not isinstance(other, Map):
-            return NotImplemented
-        return self is other
-
     def _create_map(self):
         r_x = random.randint(1, self._width - 2)
         r_y = random.randint(1, self._height - 2)
