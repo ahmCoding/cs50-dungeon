@@ -9,7 +9,11 @@ class Map:
     """
 
     def __init__(
-        self, w: int = 5, h: int = 5, start_position: tuple[int, int] = (1, 1)
+        self,
+        w: int = 5,
+        h: int = 5,
+        start_position: tuple[int, int] = (1, 1),
+        stairs_position: tuple[int, int] | None = None,
     ):
         """
         :param w: width of the map /x
@@ -19,8 +23,9 @@ class Map:
         """
         self._height = h
         self._width = w
-        self._map = []
+        self._map = list[list[Tile]]
         self._stairs_tile = Tile.STAIRS
+        self._stairs_position: tuple[int, int] | None = stairs_position
         self._start_position = start_position
 
     def _create_map(self):
@@ -33,6 +38,9 @@ class Map:
             r_y = random.randint(1, self._height - 2)  # random y-pos for stairs
             if (r_x, r_y) != self._start_position:  # no stairs at map start pos
                 break
+
+        self._stairs_position = (r_x, r_y)  # save the stairs pos
+
         tmp_map = [[Tile.WALL for w in range(self._width)] for h in range(self._height)]
         # only write somewhere in the middle of field
         for h in range(1, self._height - 1):
@@ -48,7 +56,7 @@ class Map:
         cls, w: int = 5, h: int = 5, start_position: tuple[int, int] = (1, 1)
     ):
         """
-        standard function to create the map
+        standard function to create the map / factory method
         :param w: width of the map /x
         :param h: height of the map /y
         :param start_position: x and y coordinates of the start,
@@ -64,16 +72,28 @@ class Map:
         cls, grid: list[list[Tile]], start_position: tuple[int, int]
     ):
         """
-        standard function to create the map from a grid
+        standard function to create the map from a grid / factory method
         :param grid: a 2d grid of tiles
         :param start_position: x and y coordinates of the start,
         here will be the player placed at the start of the map
         :return: a map object
         """
-        tmp_obj = cls(start_position=start_position)
+
+        # find the position of the first stairs in uploaded grid
+        stairs_pos = None
+        for y, row in enumerate(grid):
+            for x, tile in enumerate(row):
+                if tile == Tile.STAIRS:
+                    stairs_pos = (x, y)
+                    break
+            if stairs_pos is not None:
+                break
+
+        tmp_obj = cls(start_position=start_position, stairs_position=stairs_pos)
         tmp_obj._height = len(grid)
         tmp_obj._width = len(grid[0])
         tmp_obj._map = grid
+
         return tmp_obj
 
     def is_movable(self, x, y) -> bool:
@@ -111,3 +131,10 @@ class Map:
         in format of (x, y)
         """
         return self._start_position
+
+    def get_stairs_position(self) -> tuple[int, int] | None:
+        """
+        :return: the stairs position of the map as a tuple
+        in format of (x, y)
+        """
+        return self._stairs_position
