@@ -363,5 +363,7 @@ the story without diluting the version sequence. Also rejected: sentinel values
 like `(-1, -1)` for "not found yet" in the grid scan. The `None`-before-loop
 pattern reads clearer and the closing assert narrows the type cleanly; sentinels
 would only be uglier.
+
 ---
+
 *Next entry: `v0.7` (or the next milestone) — added on its own branch when done.*
