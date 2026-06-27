@@ -20,15 +20,14 @@ class Map:
         :param h: height of the map /y
         :param start_position: x and y coordinates of the map start,
             here will be the player placed at the start of the map
+        :param stairs_position: x and y coordinates of the stairs position,
+        None is a transient state and will be set immediately by factory methods
         """
         self._height = h
         self._width = w
         self._map = list[list[Tile]]
         self._stairs_tile = Tile.STAIRS
-        self._stairs_position: tuple[int, int] | None = (
-            stairs_position  # None is  a transient state and will be change immediately
-            # in further processing steps of the
-        )
+        self._stairs_position: tuple[int, int] | None = stairs_position
         self._start_position = start_position
 
     def _create_map(self):

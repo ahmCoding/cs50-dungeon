@@ -227,5 +227,94 @@ now (YAGNI, and never ship code you cannot run).
   a detail of `RawTerminal` to the caller and force a bigger interface.
 
 ---
+## v0.6 — Multiple Levels (2026-06-27)
 
-*Next entry: `v0.6` — added on its own branch when the milestone is done.*
+*Tag: `v0.6-multi-level`*
+
+**Context.** Until now the whole game ran on *one* map. The long-term vision
+needs many floors. This was the smallest, most self-contained next step: the
+loop barely changes, and it lays the foundation that random generation and
+enemies will later build on. Stairs already existed as a tile but only meant
+"you win". With more than one floor, "reached the stairs" and "the game is over"
+are no longer the same event.
+
+**Decision.**
+
+- A new core type `Dungeon` holds an ordered list of maps plus a current index.
+  Its public interface is three methods, split by CQS: `get_current_map`
+  (query), `is_last_map` (query), `next_map` (command, advances the index).
+- Winning is no longer a property of a tile. It is a property of the game state:
+  you win when you reach the stairs *and* there is no next floor. `is_won` checks
+  exactly that (`is_last_map()` and on the stairs). The old `check_win` /
+  `_win_tile` are deleted.
+- On descending, the player is moved to a fixed start position that the map now
+  owns. `Map` gains `start_position` and `stairs_position` (+ getters); the
+  random factory rolls the stairs (never on the start tile), the grid factory
+  scans the grid for the stairs tile. `Player` gains `set_position`.
+- The level change is extracted into one function `descend(dungeon, player)`:
+  advance the floor *and* place the player on the new start — together,
+  inseparably. `play` now runs on the `Dungeon`, fetching the current map fresh
+  each turn instead of holding it.
+
+**Why.**
+
+- *One concept per milestone.* The branch does exactly one thing: introduce
+  floors. A `Game` aggregate was tempting here but was pushed back, because it
+  was justified by *future* features (enemies, difficulty) we do not have yet.
+- *CQS, and "two methods are easier to merge into one than one is to split".*
+  Advancing (command) and asking "is there a next floor?" (query) are separate,
+  so the loop can safely *ask* before it *acts*. This is what makes the
+  "ask first, then descend" order in `play` possible.
+- *Win is state, not a tile.* Pressing two meanings into the stairs tile (next
+  level vs. you win) would force the code to ask "which floor am I on?" to know
+  what the stairs mean. Splitting them keeps the stairs with a single meaning:
+  "go to the next floor". Winning falls out when "next" points to nothing.
+- *Information hiding.* The dungeon owns its index and list; `play` never sees
+  `len(...) - 1`. The map owns its start and stairs positions; `play` never
+  hardcodes coordinates — it asks the map.
+- *Make the bad state impossible, don't check for it.* `descend` bundles "switch
+  map" and "move player" so a caller cannot do one without the other (which was
+  exactly an earlier bug: changing the map left the player on stale coordinates).
+- *The map owns its start position*, not the player. "Where do you start on this
+  floor" is knowledge about the level's geometry. Putting it on the map also
+  leaves the door open for later random generation to keep that tile clear.
+- *One source of truth.* `play` does not cache the current map; it calls
+  `get_current_map()` each turn. After a descend the index is the only place the
+  "where am I" state lives.
+- *Property-style test for random code.* The rule "the stairs never land on the
+  start tile" is checked by building 100 random maps and asserting the invariant
+  on each, rather than fixing a seed and asserting one position. This needs no
+  change to the production code (no seed parameter to inject) and tests the
+  *rule*, not one example. The trade-off: it is probabilistic, not a proof.
+
+**Rejected / parked.**
+
+- *Treasure / goal object as the win condition.* It felt cooler than "reach the
+  stairs", but a pick-up object with its own position and state belongs with
+  loot/inventory, not with "multiple floors". Parked as its own future
+  milestone.
+- *A `Game` aggregate that owns player + dungeon and holds `play`.* A real and
+  probably good idea — but a separate concern from multi-level, and better
+  designed *after* enemies exist, when we know what it must really hold.
+- *Up/down stairs and directional travel* (top stairs go down, bottom stairs go
+  up). Deferred; two floors and one direction are enough to prove the seam.
+- *Random spawn position on a new floor.* Would immediately require "forbidden
+  zones" (don't spawn in a wall / on the stairs). A fixed start position is the
+  cheapest thing that proves the transition. Random can come additively later.
+- *Map validation* (exactly one staircase, start tile walkable, stairs present).
+  Not needed while *I* hand-build every grid — I am the reliable source. It
+  becomes real with **procedural generation**, where a machine builds grids that
+  can truly be broken. Added at that seam, then.
+- *Factory clean-up of the `None` default.* `Map.__init__` takes
+  `stairs_position=None` so one constructor can serve both factories (the random
+  one sets it right after; the grid one passes it in). The `None` is a
+  *transient* construction state, never a valid "floor without stairs". But the
+  getter's type (`tuple | None`) currently advertises a state that never reaches
+  a caller. Planned as its own small `refactor/` step: move the rolling into the
+  random factory so `__init__` always *requires* a real position, the type
+  becomes `tuple[int, int]`, and the getter can no longer return `None`. Also on
+  the radar: declaring the whole map state in one place (e.g. `@dataclass`).
+
+---
+
+*Next entry: `v0.7` (or the next milestone) — added on its own branch when done.*

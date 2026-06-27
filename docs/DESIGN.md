@@ -54,29 +54,47 @@ Supporting principles applied throughout:
   (`MOVE_UP`, `QUIT`, …), never a raw key; the core speaks `Direction`, never a
   key string. Key/glyph knowledge stays inside the concrete terminal classes.
 
-## Current State (v0.4-input-layer)
+## Current State (v0.6-multi-level)
 
-The three-layer architecture is in place and the game is playable in the
-terminal, frozen under the tag `v0.4-input-layer`:
+The three-layer architecture is in place, the game is playable in the terminal,
+reads single key presses, and spans multiple dungeon levels — frozen under the
+tag `v0.6-multi-level`.
 
-- **Core** — `Map` (encapsulated grid; `is_movable`, `get_tile`,
-  `get_game_map`, `get_map_size`), `Player` (position + nested `Direction`
-  enum), `Tile` enum (WALL, FIELD, STAIRS). No display characters anywhere.
-- **Output** — abstract `Renderer` (`draw(g_map, player)`); `TerminalRenderer`
-  owns the symbol map (`TILE_TO_CHAR`, `PLAYER_CHAR`) and a testable
-  `to_string`, with a thin `draw` that prints it; `NullRenderer` for tests.
-- **Input** — abstract `InputSource` (`get_action() -> Action`); `Action` enum
-  (`MOVE_*`, `QUIT`, `NONE`); `TerminalInput` owns the key map and reads via
-  `input()`; `ScriptedInput` replays a fixed action list for tests.
-- **Glue (`project.py`)** — `move` (a pure rule taking a `Direction`),
-  `check_win`, an `ACTION_TO_DIRECTION` dispatch table, and the extracted
-  `play(g_map, player, in_source, renderer)` loop. `main()` wires up the
-  concrete terminal pieces and calls `play`.
-- **Tests** — units for movement, collision, win detection, rendering
-  (`to_string`), and key→action mapping (parametrized); plus an *integration*
-  test that drives the real `play` loop through `ScriptedInput` + `NullRenderer`.
-- **Tooling** — pytest, ruff, pre-commit hooks. All tests green; runs from the
-  command line, not just the IDE.
+- **Core**
+  - `Map` — encapsulated grid (`is_movable`, `get_tile`, `get_game_map`,
+    `get_map_size`). Now also owns two positions: `start_position` (where the
+    player appears) and `stairs_position`, exposed via `get_start_position`
+    and `get_stairs_position`. Two factory methods build it: `get_map_obj`
+    (random — rolls the stairs, avoiding the start tile) and
+    `get_map_obj_from_grid` (hand-built — scans the grid for the stairs tile).
+  - `Player` — position + nested `Direction` enum; `move`, `next_position`,
+    and `set_position` (used to drop the player onto a new level's start).
+  - `Tile` enum — WALL, FIELD, STAIRS. No display characters anywhere.
+  - `Dungeon` — an ordered list of maps plus a current index. The world is no
+    longer "a map" but "the current floor of a stack". CQS interface:
+    `get_current_map` (query), `is_last_map` (query), `next_map` (command).
+- **Output** — abstract `Renderer` (`draw`); `TerminalRenderer` owns the symbol
+  map and a testable `to_string`; `NullRenderer` for tests.
+- **Input** — abstract `InputSource` (`get_action() -> Action`); `Action` enum.
+  `TerminalInput` is an abstract middle class holding the shared key table;
+  `CanonicalTerminal` reads a line via `input()` (Enter), `RawTerminal` reads a
+  single key without Enter using a `RawMode` context manager
+  (`termios`/`tty` snapshot -> `setraw` -> guaranteed restore). `ScriptedInput`
+  replays a fixed action list for tests. POSIX-only; a Windows source would be
+  additive.
+- **Glue (`project.py`)** — `move` (pure rule), `check_stairs`,
+  `is_won` (won = on the last floor *and* on the stairs), and `descend`
+  (advance the dungeon + place the player on the new floor's start — one
+  inseparable operation). `play(g_dungeon, player, in_source, renderer)` runs
+  the loop against the dungeon, fetching the current map fresh each turn.
+  `main()` wires the concrete pieces and builds the `Dungeon`.
+- **Tests** — units for movement, collision, win detection, rendering, key->action
+  mapping; the `Dungeon` (including the "don't run past the last floor"
+  boundary); `is_won` (the decisive "stairs on a non-last floor does not win");
+  map stairs-finding; a property-style test (100 random maps, stairs never on
+  the start tile); plus the integration test driving `play` through
+  `ScriptedInput` + `NullRenderer`. All green.
+- **Tooling** — pytest, ruff, pre-commit hooks. Runs from the command line.
 
 ## Roadmap
 
@@ -92,26 +110,24 @@ its own branch, merged with `--no-ff`, and tagged.
 - `v0.3-renderer-interface` — abstract `Renderer` + `TerminalRenderer`.
 - `v0.4-input-layer` — abstract `InputSource` + `TerminalInput`, `Action`,
   dispatcher, `play()` extracted and integration-tested.
-
-**Next**
-
-- **v0.5 — Event-driven input (immediate next).** A new `InputSource` that
-  reads a *single key press without Enter*, so one keystroke = one turn. The
-  game stays turn-based (one move per press; auto-repeat while a key is held is
-  deferred as a later option). The OS-specific raw-key reading
-  (`termios`/`tty`, or a small lib such as `readchar`) is isolated entirely
-  inside this new class — the loop, core, and renderer are untouched. This is
-  the first real payoff of the input abstraction.
+- `v0.5-event-input` — event-driven input: `RawTerminal` reads a single key
+  without Enter via a `RawMode` context manager; `TerminalInput` becomes an
+  abstract base shared with `CanonicalTerminal`. One keystroke = one turn.
+- `v0.6-multi-level` — multiple maps behind a `Dungeon` container; stairs
+  advance to the next floor; winning = reaching the stairs on the last floor;
+  the player is placed on each new floor's start position.
 
 **Later gameplay arc** (direction, not commitments)
 
-- Stairs → next level: multiple maps, a depth counter, map switching.
 - First enemy: a second entity that moves — entities beyond the player, turn
   order.
 - Combat + HP: walking into an enemy attacks it; stats on entities.
 - Items / inventory and XP.
+- Treasure / goal object as an alternative win condition (a thing to pick up,
+  related to loot/inventory rather than descent).
 - Save / load and an end-of-run summary (serialization, aggregated state).
-- Procedural dungeon generation; permadeath.
+- Procedural dungeon generation (where map validation becomes real: exactly one
+  staircase, start tile walkable); permadeath.
 
 ## Working Method
 
