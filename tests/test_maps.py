@@ -14,7 +14,7 @@ def g_map():
         [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
         [Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL],
     ]
-    return Map().get_map_obj_from_grid(map1, (1, 2))
+    return Map.get_map_obj_from_grid(map1, (1, 2))
 
 
 def test_injected_map_size(g_map: Map) -> None:
@@ -34,5 +34,5 @@ def test_get_stairs_pos(g_map: Map) -> None:
 def test_stairs_pos_and_start_pos() -> None:
     """if the stairs_position and start_position are different"""
     for _ in range(100):
-        my_map = Map().get_map_obj()
+        my_map = Map.get_map_obj()
         assert my_map.get_stairs_position() != my_map.get_start_position()
