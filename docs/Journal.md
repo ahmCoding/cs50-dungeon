@@ -316,5 +316,52 @@ are no longer the same event.
   the radar: declaring the whole map state in one place (e.g. `@dataclass`).
 
 ---
+## refactor/factory-cleanup — Constructor takes a real stairs position (2026-06-27)
 
+**Context.** After v0.6, `Map.__init__` accepted `stairs_position: tuple | None`.
+When `None` came in, the constructor itself rolled a random stairs position. The
+side effect lived in the getter: `get_stairs_position()` was typed `tuple | None`,
+so it advertised a "floor without stairs" state to every caller. That state never
+actually happened — the `None` was only a transient moment during construction.
+The type was lying about reality.
+
+**Decision.** Move the rolling out of the constructor into the factory.
+- A private static helper `_create_2d_tile_grid` now builds the grid *and* rolls
+  the stairs position, returning both.
+- `get_map_obj` (random) calls it and hands a finished position to the constructor.
+- `get_map_obj_from_grid` scans the given grid for the `STAIRS` tile and hands the
+  found position in.
+- `__init__` now *requires* `stairs_position: tuple[int, int]` — no `None`.
+- The getter is now typed `tuple[int, int]` and carries no defensive assert.
+Cleaned up in the same pass: dead post-construction writes in the grid factory
+(`tmp_obj._height = …` etc.) were removed — the constructor already sets those.
+And `_stairs_tile` is no longer stored per instance; `get_stairs_tile()` is now a
+`@staticmethod` returning the constant `Tile.STAIRS`.
+
+**Why.** *Make illegal states unrepresentable instead of checking for them.* Once
+both factories must produce a real position and the constructor demands one,
+`None` can never reach the field — so the type can honestly say `tuple[int, int]`
+and no runtime check is needed. *Single Responsibility*: the constructor stores
+state, the factory builds it; the rolling logic now lives where it belongs.
+*Encapsulation*: nothing writes the Map's private fields from outside anymore.
+*Constant ≠ instance state*: a value identical for every Map (`Tile.STAIRS`) does
+not belong in `__init__`; a `@staticmethod` says that plainly while keeping the
+Map as the single place that knows which tile means "goal" (so `project.py` still
+does not need to import `Tile`).
+
+**Lesson.** The same line — `assert x is not None` — was right in one place and
+dead in another. In the grid-scan loop, `None` is a real "not found yet" sentinel,
+so the assert both checks a reachable state and narrows the type for the checker.
+In the getter, `None` was unreachable after the refactor, so the identical assert
+guarded nothing. Whether a guard means anything depends on whether the guarded
+state can actually be reached.
+
+**Rejected.** A version tag (e.g. `v0.7`) for this branch. Tags mark milestones
+with new *behaviour*; this refactor changes none — all 36 tests stayed green and
+untouched, which is the proof. The `--no-ff` merge boundary plus this entry record
+the story without diluting the version sequence. Also rejected: sentinel values
+like `(-1, -1)` for "not found yet" in the grid scan. The `None`-before-loop
+pattern reads clearer and the closing assert narrows the type cleanly; sentinels
+would only be uglier.
+---
 *Next entry: `v0.7` (or the next milestone) — added on its own branch when done.*
