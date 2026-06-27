@@ -108,10 +108,6 @@ class Map:
             start_position=start_position,
             stairs_position=stairs_pos,
         )
-        tmp_obj._height = len(grid)
-        tmp_obj._width = len(grid[0])
-        tmp_obj._map = grid
-
         return tmp_obj
 
     def is_movable(self, x, y) -> bool:
