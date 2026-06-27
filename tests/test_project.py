@@ -1,5 +1,6 @@
 import pytest
 
+from game.core.dungeon import Dungeon
 from game.core.map import Map
 from game.core.player import Player
 from game.core.tile import Tile
@@ -7,20 +8,36 @@ from game.input.action import Action
 from game.input.scripted import ScriptedInput
 from game.render.null import NullRenderer
 from game.render.terminal import TerminalRenderer
-from project import check_win, move, play
+from project import is_won, move, play
 
 
 @pytest.fixture
 def g_map():
-    my_map = [
+    map1 = [
         [Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL],
         [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
         [Tile.WALL, Tile.FIELD, Tile.STAIRS, Tile.FIELD, Tile.WALL],
         [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
         [Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL],
-    ]  # the win-tile is at coordinate x=2,y=2 , the char is ">"
-    my_map = Map.get_map_obj_from_grid(my_map)
-    return my_map
+    ]
+    return Map().get_map_obj_from_grid(map1, (1, 1))
+
+
+@pytest.fixture
+def g_map2():
+    map2 = [
+        [Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL],
+        [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
+        [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
+        [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
+        [Tile.WALL, Tile.WALL, Tile.WALL, Tile.STAIRS, Tile.WALL],
+    ]
+    return Map().get_map_obj_from_grid(map2, (1, 1))
+
+
+@pytest.fixture
+def g_dungeon(g_map: Map, g_map2: Map):
+    return Dungeon([g_map, g_map2])
 
 
 @pytest.fixture
@@ -65,17 +82,24 @@ def test_move_to_lower_wall(g_map: Map, player: Player):
     assert player.y == m_height - 2
 
 
-def test_check_win_false(g_map: Map):
-    p1 = Player(
-        1, 2
-    )  # set the player at the coordinate x=1,y=2 , where we have a "." on the map
-
-    assert not (check_win(g_map, p1))
+def test_player_on_stairs_game_not_won(g_dungeon: Dungeon):
+    """we set the player on the stairs of the first Map"""
+    p1 = Player(2, 2)
+    assert not is_won(g_dungeon, p1)
 
 
-def test_check_win_true(g_map: Map):
-    p1 = Player(2, 2)  # set the player at the wining-coordinate (">")on the map
-    assert check_win(g_map, p1)  # player at coordinate x=2,y=2  like  map tile = ">"
+def test_player_game_not_won(g_dungeon: Dungeon):
+    """we set the player in the second Map on a normal field"""
+    g_dungeon.next_map()
+    p1 = Player(2, 0)
+    assert not is_won(g_dungeon, p1)
+
+
+def test_is_won_true(g_dungeon: Dungeon):
+    """we set the player on the wining coordinate, second map x=3,y=4"""
+    g_dungeon.next_map()
+    p1 = Player(3, 4)
+    assert is_won(g_dungeon, p1)
 
 
 def test_render_player(g_map: Map, player: Player, t_renderer: TerminalRenderer):
@@ -96,7 +120,7 @@ def test_render_field(g_map: Map, player: Player, t_renderer: TerminalRenderer):
 
 
 def test_play(
-    g_map: Map,
+    g_dungeon: Dungeon,
     player: Player,
 ):
     """
@@ -106,6 +130,6 @@ def test_play(
     scripted_input = ScriptedInput([Action.MOVE_RIGHT, Action.MOVE_RIGHT, Action.QUIT])
     renderer = NullRenderer()
     y_before_actions = player.y
-    play(g_map, player, scripted_input, renderer)
+    play(g_dungeon, player, scripted_input, renderer)
 
     assert player.x == 3 and player.y == y_before_actions

@@ -58,3 +58,9 @@ def test_player_next_right(player: Player):
     new_x, new_y = player.next_position(Player.Direction.RIGHT)
     assert player.x < new_x
     assert player.y == new_y
+
+
+def test_player_set_pose(player: Player):
+    assert player.get_position() == (0, 0)  # default pos
+    player.set_position(2, 4)
+    assert player.get_position() == (2, 4)
