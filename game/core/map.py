@@ -27,7 +27,6 @@ class Map:
         self._height = h
         self._width = w
         self._map = grid
-        self._stairs_tile = Tile.STAIRS
         self._start_position = start_position
         self._stairs_position = stairs_position
 
@@ -130,8 +129,9 @@ class Map:
             return self._map[y][x]
         return Tile.WALL
 
-    def get_stairs_tile(self) -> Tile:
-        return self._stairs_tile
+    @staticmethod
+    def get_stairs_tile() -> Tile:
+        return Tile.STAIRS
 
     def get_map_size(self) -> tuple[int, int]:
         """
