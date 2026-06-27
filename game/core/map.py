@@ -97,7 +97,7 @@ class Map:
                     break
             if stairs_pos is not None:
                 break
-        assert stairs_pos is not None  # there muss be a stairs in the gird
+        assert stairs_pos is not None  # there must be a stairs in the gird
         # grid width and height
         grid_h = len(grid)
         grid_w = len(grid[0])
@@ -155,5 +155,4 @@ class Map:
         :return: the stairs position of the map as a tuple
         in format of (x, y)
         """
-        assert self._stairs_position is not None
         return self._stairs_position
