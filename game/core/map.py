@@ -25,7 +25,10 @@ class Map:
         self._width = w
         self._map = list[list[Tile]]
         self._stairs_tile = Tile.STAIRS
-        self._stairs_position: tuple[int, int] | None = stairs_position
+        self._stairs_position: tuple[int, int] | None = (
+            stairs_position  # None is  a transient state and will be change immediately
+            # in further processing steps of the
+        )
         self._start_position = start_position
 
     def _create_map(self):
@@ -132,9 +135,10 @@ class Map:
         """
         return self._start_position
 
-    def get_stairs_position(self) -> tuple[int, int] | None:
+    def get_stairs_position(self) -> tuple[int, int]:
         """
         :return: the stairs position of the map as a tuple
         in format of (x, y)
         """
+        assert self._stairs_position is not None
         return self._stairs_position
