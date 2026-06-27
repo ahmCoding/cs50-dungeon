@@ -10,48 +10,53 @@ class Map:
 
     def __init__(
         self,
-        w: int = 5,
-        h: int = 5,
-        start_position: tuple[int, int] = (1, 1),
-        stairs_position: tuple[int, int] | None = None,
+        grid: list[list[Tile]],
+        w: int,
+        h: int,
+        start_position: tuple[int, int],
+        stairs_position: tuple[int, int],
     ):
         """
-        :param w: width of the map /x
-        :param h: height of the map /y
-        :param start_position: x and y coordinates of the map start,
-            here will be the player placed at the start of the map
-        :param stairs_position: x and y coordinates of the stairs position,
-        None is a transient state and will be set immediately by factory methods
+        :param grid: 2d grid of Tile-Objects /game map
+        :param w: width of the grid /x
+        :param h: height of the grid /y
+        :param start_position: x and y coordinates of the grid's start point ,
+            here will be the player placed at the start
+        :param stairs_position: x and y coordinates of the stairs position
         """
         self._height = h
         self._width = w
-        self._map = list[list[Tile]]
-        self._stairs_tile = Tile.STAIRS
-        self._stairs_position: tuple[int, int] | None = stairs_position
+        self._map = grid
         self._start_position = start_position
+        self._stairs_position = stairs_position
 
-    def _create_map(self):
+    @staticmethod
+    def _create_2d_tile_grid(
+        width: int, height: int, start_position: tuple[int, int]
+    ) -> tuple[list[list[Tile]], tuple[int, int]]:
         """
-        this function creates the map. a map object consts of Tile-Objects
-        the position of the stairs on the map will be chosen randomly
+        this function creates a 2d grid of Tile-Objects.
+        the position of the stairs on the grid will be chosen randomly
+        :return: a tuple , which contains a 2d grid of Tile-Objects and the position
+        of the stairs on the grid in (x,y) format
         """
         while True:
-            r_x = random.randint(1, self._width - 2)  # random x-pos for stairs
-            r_y = random.randint(1, self._height - 2)  # random y-pos for stairs
-            if (r_x, r_y) != self._start_position:  # no stairs at map start pos
+            r_x = random.randint(1, width - 2)  # random x-pos for stairs
+            r_y = random.randint(1, height - 2)  # random y-pos for stairs
+            if (r_x, r_y) != start_position:  # no stairs at map start pos
                 break
 
-        self._stairs_position = (r_x, r_y)  # save the stairs pos
+        stairs_position = (r_x, r_y)  # save the stairs pos
 
-        tmp_map = [[Tile.WALL for w in range(self._width)] for h in range(self._height)]
+        tile_grid = [[Tile.WALL for w in range(width)] for h in range(height)]
         # only write somewhere in the middle of field
-        for h in range(1, self._height - 1):
-            for w in range(1, self._width - 1):
+        for h in range(1, height - 1):
+            for w in range(1, width - 1):
                 if h == r_y and w == r_x:
-                    tmp_map[h][w] = Tile.STAIRS
+                    tile_grid[h][w] = Tile.STAIRS
                 else:
-                    tmp_map[h][w] = Tile.FIELD
-        self._map = tmp_map
+                    tile_grid[h][w] = Tile.FIELD
+        return tile_grid, stairs_position
 
     @classmethod
     def get_map_obj(
@@ -63,10 +68,11 @@ class Map:
         :param h: height of the map /y
         :param start_position: x and y coordinates of the start,
         here will be the player placed at the start of the map
-        :return: a map object
+        :return: an object of the Map-Class
         """
-        tmp_obj = cls(w, h, start_position)
-        tmp_obj._create_map()
+        grid, stairs_pos = cls._create_2d_tile_grid(w, h, start_position)
+        tmp_obj = cls(grid, w, h, start_position, stairs_pos)
+
         return tmp_obj
 
     @classmethod
@@ -78,7 +84,7 @@ class Map:
         :param grid: a 2d grid of tiles
         :param start_position: x and y coordinates of the start,
         here will be the player placed at the start of the map
-        :return: a map object
+        :return: an object of the Map-Class
         """
 
         # find the position of the first stairs in uploaded grid
@@ -90,12 +96,17 @@ class Map:
                     break
             if stairs_pos is not None:
                 break
-
-        tmp_obj = cls(start_position=start_position, stairs_position=stairs_pos)
-        tmp_obj._height = len(grid)
-        tmp_obj._width = len(grid[0])
-        tmp_obj._map = grid
-
+        assert stairs_pos is not None  # there must be a stairs in the gird
+        # grid width and height
+        grid_h = len(grid)
+        grid_w = len(grid[0])
+        tmp_obj = cls(
+            grid=grid,
+            w=grid_w,
+            h=grid_h,
+            start_position=start_position,
+            stairs_position=stairs_pos,
+        )
         return tmp_obj
 
     def is_movable(self, x, y) -> bool:
@@ -118,8 +129,9 @@ class Map:
             return self._map[y][x]
         return Tile.WALL
 
-    def get_stairs_tile(self) -> Tile:
-        return self._stairs_tile
+    @staticmethod
+    def get_stairs_tile() -> Tile:
+        return Tile.STAIRS
 
     def get_map_size(self) -> tuple[int, int]:
         """
@@ -139,5 +151,4 @@ class Map:
         :return: the stairs position of the map as a tuple
         in format of (x, y)
         """
-        assert self._stairs_position is not None
         return self._stairs_position
