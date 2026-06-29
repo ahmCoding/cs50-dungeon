@@ -35,9 +35,9 @@ def test_my_turn_to_move_surrounded_by_walls(g_map: Map):
     be the same one after x.Times of call on Enemy.my_turn_to_move
     """
     for _ in range(100):
-        enemy = Enemy(x=3, y=1)
+        enemy = Enemy(x=1, y=1)
         enemy.my_turn_to_move(g_map)
-        assert enemy.get_position() == (3, 1)
+        assert enemy.get_position() == (1, 1)
 
 
 def test_my_turn_to_move_random_map(g_map: Map):
