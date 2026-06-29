@@ -109,7 +109,7 @@ class Map:
         )
         return tmp_obj
 
-    def is_movable(self, x, y) -> bool:
+    def is_movable(self, x: int, y: int) -> bool:
         return self.get_tile(x, y) != Tile.WALL
 
     def get_game_map(self) -> list[list[Tile]]:

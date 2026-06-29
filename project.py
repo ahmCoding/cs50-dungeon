@@ -11,6 +11,8 @@ from game.render.terminal import TerminalRenderer
 
 
 def move(g_map: Map, player: Player, p_direction: Player.Direction):
+    """function that moves the character according to the given direction
+    on the given map"""
     new_x, new_y = player.next_position(p_direction)
     if g_map.is_movable(new_x, new_y):
         player.move(p_direction)

@@ -27,6 +27,11 @@ class Character:
         self.y = y
 
     def move(self, direction: Direction):
+        """
+        function that moves the character according to the given direction
+        :param direction:
+        :return:
+        """
         dx, dy = direction.value
         self.x += dx
         self.y += dy
@@ -40,3 +45,11 @@ class Character:
         :return: (x, y)
         """
         return self.x, self.y
+
+    def next_position(self, direction: Direction) -> tuple[int, int]:
+        """This function returns the next position in the game based in the given
+        direction This is only a new calculated position, the Player is not moved to
+         the direction
+        """
+        dx, dy = direction.value
+        return self.x + dx, self.y + dy
