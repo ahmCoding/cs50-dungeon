@@ -19,13 +19,3 @@ class Enemy(Character):
         ]
         if moveable_dirs:
             self.move(random.choice(moveable_dirs))
-
-
-def main():
-    map1 = Map.get_map_obj()
-    e1 = Enemy(*map1.get_start_position())
-    e1.my_turn_to_move(map1)
-
-
-if __name__ == "__main__":
-    main()
