@@ -41,9 +41,9 @@ def test_my_turn_to_move_surrounded_by_walls(g_map: Map):
 
 
 def test_my_turn_to_move_random_map():
-    """on a randomly created map(Map.get_map_obj) the player will be moved for
+    """on a randomly created map(Map.get_map_obj) the enemy will be moved for
     x.times by calling Enemy.my_turn_to_move . after the calls the position
-     of the player should still be a movable one(not a wall)
+     of the enemy should still be a movable one(not a wall)
     """
     for _ in range(100):
         r_map = Map.get_map_obj()

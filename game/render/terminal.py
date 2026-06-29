@@ -1,19 +1,22 @@
+from game.core.character import Character
 from game.core.map import Map
-from game.core.player import Player
 from game.core.tile import Tile
 from game.render.base import Renderer
 
 
 class TerminalRenderer(Renderer):
     TILE_TO_CHAR = {Tile.WALL: "#", Tile.STAIRS: ">", Tile.FIELD: "."}
-    PLAYER_CHAR = "@"  # temporary char for the player
+    CHARACTER_TO_CHAR = {"Player": "@", "Enemy": "&"}  # temporary char for the player
 
-    def draw(self, g_map: Map, player: Player) -> None:
-        print(self.to_string(g_map, player))
+    def draw(self, g_map: Map, characters: list[Character]) -> None:
+        print(self.to_string(g_map, characters))
 
-    def to_string(self, g_map: Map, player: Player) -> str:
+    def to_string(self, g_map: Map, characters: list[Character]) -> str:
         rendered_map_as_list = self._from_tiles_to_string_list(g_map.get_game_map())
-        rendered_map_as_list[player.y][player.x] = self.PLAYER_CHAR
+        for character in characters:
+            rendered_map_as_list[character.y][character.x] = self.CHARACTER_TO_CHAR[
+                character.__class__.__name__
+            ]
         return self._from_string_list_to_string(rendered_map_as_list)
 
     @staticmethod

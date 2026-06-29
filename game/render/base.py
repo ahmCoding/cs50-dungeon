@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 
+from game.core.character import Character
 from game.core.map import Map
-from game.core.player import Player
 
 
 class Renderer(ABC):
     @abstractmethod
-    def draw(self, g_map: Map, player: Player) -> None:
+    def draw(self, g_map: Map, characters: list[Character]) -> None:
         pass
