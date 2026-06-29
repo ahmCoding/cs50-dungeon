@@ -17,7 +17,8 @@ class Enemy(Character):
             for direct in Character.Direction
             if g_map.is_movable(*self.next_position(direct))
         ]
-        self.move(random.choice(moveable_dirs))
+        if moveable_dirs:
+            self.move(random.choice(moveable_dirs))
 
 
 def main():
