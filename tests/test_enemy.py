@@ -40,7 +40,7 @@ def test_my_turn_to_move_surrounded_by_walls(g_map: Map):
         assert enemy.get_position() == (1, 1)
 
 
-def test_my_turn_to_move_random_map(g_map: Map):
+def test_my_turn_to_move_random_map():
     """on a randomly created map(Map.get_map_obj) the player will be moved for
     x.times by calling Enemy.my_turn_to_move . after the calls the position
      of the player should still be a movable one(not a wall)
@@ -49,5 +49,5 @@ def test_my_turn_to_move_random_map(g_map: Map):
         r_map = Map.get_map_obj()
         # set the enemy on start position of the map(safe option for start on map)
         enemy = Enemy(*r_map.get_start_position())
-        enemy.my_turn_to_move(g_map)
+        enemy.my_turn_to_move(r_map)
         assert r_map.is_movable(*enemy.get_position())
