@@ -108,7 +108,7 @@ def test_render_player(g_map: Map, player: Player, t_renderer: TerminalRenderer)
     tmp_map = [row for row in str_map.split("\n") if row != ""]
     # player is as defined in @pytest.fixture for player in coordinate x=1,y=1.
     # Here we test the position for the valid char
-    assert tmp_map[1][1] == TerminalRenderer.CHARACTER_TO_CHAR["Player"]
+    assert tmp_map[1][1] == TerminalRenderer.CHARACTER_TO_CHAR[type(player)]
 
 
 def test_render_field(g_map: Map, player: Player, t_renderer: TerminalRenderer):
