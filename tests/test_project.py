@@ -1,6 +1,7 @@
 import pytest
 
 from game.core.dungeon import Dungeon
+from game.core.enemy import Enemy
 from game.core.map import Map
 from game.core.player import Player
 from game.core.tile import Tile
@@ -103,15 +104,15 @@ def test_is_won_true(g_dungeon: Dungeon):
 
 
 def test_render_player(g_map: Map, player: Player, t_renderer: TerminalRenderer):
-    str_map = t_renderer.to_string(g_map, player)
+    str_map = t_renderer.to_string(g_map, [player])
     tmp_map = [row for row in str_map.split("\n") if row != ""]
     # player is as defined in @pytest.fixture for player in coordinate x=1,y=1.
     # Here we test the position for the valid char
-    assert tmp_map[1][1] == TerminalRenderer.PLAYER_CHAR
+    assert tmp_map[1][1] == TerminalRenderer.CHARACTER_TO_CHAR["Player"]
 
 
 def test_render_field(g_map: Map, player: Player, t_renderer: TerminalRenderer):
-    str_map = t_renderer.to_string(g_map, player)
+    str_map = t_renderer.to_string(g_map, [player])
     tmp_map = [row for row in str_map.split("\n") if row != ""]
     # as defined in @pytest.fixture for g_map,the map contains x=2,y=2: ">"
     # and x=3,y=3: "." . we simply compare the render version with the original map
@@ -130,6 +131,7 @@ def test_play(
     scripted_input = ScriptedInput([Action.MOVE_RIGHT, Action.MOVE_RIGHT, Action.QUIT])
     renderer = NullRenderer()
     y_before_actions = player.y
-    play(g_dungeon, player, scripted_input, renderer)
+    enemy = Enemy(1, 3)  # only a random chosen pos for enemy
+    play(g_dungeon, player, enemy, scripted_input, renderer)
 
     assert player.x == 3 and player.y == y_before_actions
