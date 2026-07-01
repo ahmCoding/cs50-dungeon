@@ -10,21 +10,24 @@ class Level:
         self._enemies = enemies
 
     @classmethod
-    def get_level_object(cls, g_map: Map, enemy_counts: int):
+    def get_level_object(cls, g_map: Map, enemy_count: int):
         """function to create a Level object / factory
         :param g_map: game map
-        :param enemy_counts: number of enemies on the map
+        :param enemy_count: number of enemies on the map, if this number is greater than
+         the number of free slots on the map, the number of free slots will be taken
         :return: Level object
         """
-        created_enemies = 0
-        free_pos_of_map = g_map.get_free_map_positions()
+        list_free_pos_of_map = list(g_map.get_free_map_positions())
+        try:
+            random_free_pos_of_map = random.sample(list_free_pos_of_map, enemy_count)
+        except ValueError:  # if enemy_count > free slots of the map
+            random_free_pos_of_map = random.sample(
+                list_free_pos_of_map, len(list_free_pos_of_map)
+            )
+
         enemies: list[Enemy] = []
-        if free_pos_of_map:
-            while enemy_counts > created_enemies and free_pos_of_map:
-                pos = random.choice(list(free_pos_of_map))
-                free_pos_of_map.remove(pos)
-                enemies.append(Enemy(*pos))
-                created_enemies += 1
+        for r_pos in enumerate(random_free_pos_of_map):
+            enemies.append(Enemy(*r_pos))
 
         return cls(g_map, enemies)
 
