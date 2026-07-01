@@ -43,7 +43,16 @@ Supporting principles applied throughout:
   abstractions (`Renderer`, `InputSource`), never the concrete classes.
 - **Dependency injection** — collaborators are *received*, not *created*, by
   the code that uses them. `main()` builds the concrete pieces; `play()` only
-  consumes them. This is what makes the loop testable.
+  consumes them. This is what makes the loop testable. The same idea applies at
+  method level: `Enemy.my_turn_to_move(g_map)` receives the current map instead
+  of storing one.
+- **Ownership follows lifetime** — a thing is owned by whatever shares its
+  lifetime. Enemies are born with a floor and die with it, so the `Level` owns
+  them; the player outlives every floor, so no floor owns him — he is only
+  *placed* onto each floor's start.
+- **Make illegal states unconstructable** — instead of checking for a bad state,
+  arrange the code so it cannot be built. A `Level` spawns its own enemies from
+  its own map, so an enemy on the wrong geometry cannot exist.
 - **Determinism in tests** — the game may be random; tests never are. The map
   can be built from a fixed grid (`get_map_obj_from_grid`).
 - **Test doubles** — a `ScriptedInput` (fake `InputSource`) feeds a fixed list
@@ -54,27 +63,52 @@ Supporting principles applied throughout:
   (`MOVE_UP`, `QUIT`, …), never a raw key; the core speaks `Direction`, never a
   key string. Key/glyph knowledge stays inside the concrete terminal classes.
 
-## Current State (v0.6-multi-level)
+## Current State (v0.8-enemy-spawn)
 
 The three-layer architecture is in place, the game is playable in the terminal,
-reads single key presses, and spans multiple dungeon levels — frozen under the
-tag `v0.6-multi-level`.
+reads single key presses, spans multiple dungeon levels, and now has autonomous
+enemies that are owned per floor and spawn at valid random positions — frozen
+under the tag `v0.8-enemy-spawn`.
 
 - **Core**
+  - `Character` — the parent of every moving entity. Holds the *shared* movement
+    machinery: the position (`x`, `y`), a nested `Direction` enum, and
+    `move`, `next_position`, `set_position`, `get_position`. Shared, concrete
+    code — written once and inherited.
+  - `Player` — a thin `Character` subclass. Its direction comes from outside
+    (the key press); it adds no movement logic of its own.
+  - `Enemy` — a `Character` subclass that acts on its own. `my_turn_to_move(g_map)`
+    collects every passable neighbour direction, picks one at random, and stands
+    still when none are free. The map is passed *as a method argument*, so the
+    enemy holds no map state and runs on any map.
   - `Map` — encapsulated grid (`is_movable`, `get_tile`, `get_game_map`,
-    `get_map_size`). Now also owns two positions: `start_position` (where the
-    player appears) and `stairs_position`, exposed via `get_start_position`
-    and `get_stairs_position`. Two factory methods build it: `get_map_obj`
+    `get_map_size`). Owns two positions: `start_position` (where the player
+    appears) and `stairs_position`, exposed via `get_start_position` and
+    `get_stairs_position`. Two factory methods build it: `get_map_obj`
     (random — rolls the stairs, avoiding the start tile) and
     `get_map_obj_from_grid` (hand-built — scans the grid for the stairs tile).
-  - `Player` — position + nested `Direction` enum; `move`, `next_position`,
-    and `set_position` (used to drop the player onto a new level's start).
+    New in v0.8: `get_free_map_positions()` returns a `set` of spawnable tiles —
+    every `FIELD` that is not the start position. Walls and stairs drop out on
+    their own because they are not `FIELD`. This is pure geometry: the map
+    *offers* free tiles, it does not choose among them.
   - `Tile` enum — WALL, FIELD, STAIRS. No display characters anywhere.
-  - `Dungeon` — an ordered list of maps plus a current index. The world is no
-    longer "a map" but "the current floor of a stack". CQS interface:
-    `get_current_map` (query), `is_last_map` (query), `next_map` (command).
+  - `Level` — a floor: it owns one `Map` **plus its own** `list[Enemy]`. The
+    factory `get_level_object(g_map, enemy_count=1)` spawns the enemies itself,
+    drawing `enemy_count` distinct free tiles from the map via `random.sample`
+    (capped at the number of free tiles). `get_map` and `get_enemies` expose the
+    contents; `move_enemies()` moves every enemy of the floor (the owner moves
+    its own enemies). A level cannot exist without its enemies, and an enemy
+    cannot land on geometry it does not belong to.
+  - `Dungeon` — an ordered list of **levels** plus a current index. The world is
+    "the current floor of a stack". CQS interface: `get_current_level` (query),
+    `is_last_level` (query), `next_level` (command).
 - **Output** — abstract `Renderer` (`draw`); `TerminalRenderer` owns the symbol
-  map and a testable `to_string`; `NullRenderer` for tests.
+  map and a testable `to_string`; `NullRenderer` for tests. `draw` takes the map
+  and a `list[Character]`, stamping each entity onto the map by position — a new
+  entity type joins the list instead of changing the signature (open/closed).
+  The entity→glyph table `CHARACTER_TO_CHAR` is keyed on the **class object**
+  (`type(character)`), typed `dict[type[Character], str]`, so a missing entry
+  fails loudly rather than a rename drifting silently.
 - **Input** — abstract `InputSource` (`get_action() -> Action`); `Action` enum.
   `TerminalInput` is an abstract middle class holding the shared key table;
   `CanonicalTerminal` reads a line via `input()` (Enter), `RawTerminal` reads a
@@ -84,17 +118,25 @@ tag `v0.6-multi-level`.
   additive.
 - **Glue (`project.py`)** — `move` (pure rule), `check_stairs`,
   `is_won` (won = on the last floor *and* on the stairs), and `descend`
-  (advance the dungeon + place the player on the new floor's start — one
-  inseparable operation). `play(g_dungeon, player, in_source, renderer)` runs
-  the loop against the dungeon, fetching the current map fresh each turn.
-  `main()` wires the concrete pieces and builds the `Dungeon`.
+  (advance the dungeon + place the player on the new floor's map start — one
+  inseparable operation). `play(g_dungeon, player, in_source, renderer)` runs the
+  loop against the dungeon: it draws the current map together with the player and
+  the current level's enemies, moves the player, handles descent, then lets the
+  current level move its enemies. Enemies are read from the level, never passed
+  in. `main()` wires the concrete pieces: it builds the maps, wraps each in a
+  `Level`, stacks them in a `Dungeon`, and starts `play`.
 - **Tests** — units for movement, collision, win detection, rendering, key->action
   mapping; the `Dungeon` (including the "don't run past the last floor"
   boundary); `is_won` (the decisive "stairs on a non-last floor does not win");
-  map stairs-finding; a property-style test (100 random maps, stairs never on
-  the start tile); plus the integration test driving `play` through
-  `ScriptedInput` + `NullRenderer`. All green.
-- **Tooling** — pytest, ruff, pre-commit hooks. Runs from the command line.
+  map stairs-finding; property-style tests over 100 random maps: stairs never on
+  the start tile, every free position is movable, and the start and stairs tiles
+  are never returned as free. Enemy behaviour: after a move it is never inside a
+  wall, a walled-in enemy stays put (deterministic), and over 100 random maps it
+  always lands on a movable tile. Level spawning: the enemy count is honoured,
+  and every spawned enemy stands on a free field. Plus the integration test
+  driving `play` through `ScriptedInput` + `NullRenderer`. All green.
+- **Tooling** — pytest, ruff, pre-commit hooks. The command line and CI are the
+  source of truth, not the IDE.
 
 ## Roadmap
 
@@ -116,18 +158,34 @@ its own branch, merged with `--no-ff`, and tagged.
 - `v0.6-multi-level` — multiple maps behind a `Dungeon` container; stairs
   advance to the next floor; winning = reaching the stairs on the last floor;
   the player is placed on each new floor's start position.
+- `v0.7-first-enemy` — a `Character` parent shared by `Player` and a new `Enemy`
+  that moves on its own after each player turn; the renderer takes a list of
+  drawables keyed on the class object.
+- `v0.8-enemy-spawn` — enemies are owned per floor by a new `Level` (map + its
+  enemies); the `Dungeon` holds levels; enemies spawn at valid random positions
+  (not wall, not stairs, not start) via a `Map` free-tiles query. The hardcoded
+  orphan enemy is gone.
 
 **Later gameplay arc** (direction, not commitments)
 
-- First enemy: a second entity that moves — entities beyond the player, turn
-  order.
-- Combat + HP: walking into an enemy attacks it; stats on entities.
+- Combat + HP: walking into an enemy attacks it; stats on entities. Next.
 - Items / inventory and XP.
 - Treasure / goal object as an alternative win condition (a thing to pick up,
   related to loot/inventory rather than descent).
+- A `Game` aggregate holding player + dungeon and owning `play` — designable now
+  that per-floor ownership is clean.
 - Save / load and an end-of-run summary (serialization, aggregated state).
 - Procedural dungeon generation (where map validation becomes real: exactly one
   staircase, start tile walkable); permadeath.
+
+**Known small cleanups (parked)**
+
+- The player's floor-1 start is still hardcoded in `main()` and matches the map
+  start only by coincidence; it should be read from the first level's map start,
+  as `descend` already does — one source of truth. Behaviour-preserving today.
+- Clear the terminal between frames — the view scrolls instead of redrawing.
+- A pre-push / CI guard that runs the tests, so the IDE cannot wave a red push
+  through as green.
 
 ## Working Method
 

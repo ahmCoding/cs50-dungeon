@@ -442,3 +442,95 @@ and contact effects are out of scope — that is M2.
   with a valid random spawn (forbidden zones). → next milestone (before combat).
 - Clear the terminal between frames — the view scrolls down instead of redrawing
   in place.
+
+---
+
+## v0.8 — Enemy Spawn (per-floor ownership) (2026-07-01)
+
+**Context.** After v0.7 the enemy was an orphan. One `Enemy` was hardcoded at
+`(1, 3)` in `main()`, passed into `play`, and floated across floors at the same
+coordinates. The player, by contrast, was already owned by the map: the map holds
+`start_position`, and `descend` drops the player onto the next map's start. This
+milestone removes that asymmetry — enemies get a real owner (the floor) and a valid
+*random* spawn — so combat (M2) can rest on enemies that properly exist per floor.
+Combat itself stays out of scope.
+
+**Decision.**
+- New `Level` class: it owns a `Map` **plus its own** `list[Enemy]`. A level cannot
+  exist without its enemies.
+- `Level.get_level_object(g_map, enemy_count=1)` — a factory that **spawns the
+  enemies itself** from the map. No ready-made enemy list is handed in.
+- New `Map` query `get_free_map_positions()` → a `set` of spawnable tiles: `FIELD`
+  tiles that are not the start position. Walls and stairs fall out on their own,
+  because they are not `FIELD`.
+- `Dungeon` now holds `list[Level]` instead of `list[Map]`
+  (`get_current_level` / `next_level` / `is_last_level`). The ordered-index model is
+  unchanged.
+- `play` no longer receives an `enemy` argument; it reads the enemies from the
+  current level, and `Level.move_enemies()` moves them (the owner moves its own
+  enemies — tell, don't ask). The orphan `Enemy(1, 3)` in `main()` is gone.
+- Tests: free-position invariants (start and stairs are never returned; every
+  returned tile is movable, over 100 random maps); the level's enemy count; and
+  **every spawned enemy stands on a free field**.
+
+**Why.**
+- *Ownership follows lifetime.* An enemy is born with its floor and dies with it, so
+  the floor owns it. The player outlives every single floor — he walks through the
+  whole dungeon — so no floor owns him; he lives above them and is only *moved* onto
+  each floor's start. "On a level" is not "belongs to a level."
+- *One named object beats parallel lists or a dict.* Two lists (maps + enemies)
+  coupled by index can silently drift apart — a false state waiting to happen. A dict
+  keeps the binding but throws away the order the `Dungeon` needs and stays an
+  anonymous container. A named `Level` keeps the order, makes "a map without its
+  enemies" unconstructable, and grows cleanly (treasure next) without reshaping a
+  tuple.
+- *Born together, never broken.* The factory spawns from *this* map's free tiles, so
+  an enemy can never land on geometry it does not belong to. The broken state is not
+  guarded against — it is impossible to build. Same idea as the map factory rolling
+  its own stairs.
+- *Collect, then choose — never roll until free.* Spawning asks the map for the set
+  of free tiles and samples from it, so a full or tiny map yields "no enemy" at once
+  instead of an endless retry. Same shape as the enemy's own move logic.
+
+**Lesson.**
+- *Arbitrary is not random.* `set.pop()` is documented as removing an *arbitrary*
+  element, not a random one. For tuples of small ints the hash is stable, so `pop`
+  returns the same order on every run — enemies spawned on identical tiles each game.
+  The right tool was `random.sample`, which draws N distinct positions in one call. A
+  non-promise is not a promise of randomness.
+- *A false-green whispers, again.* A first spawn loop used `enumerate` and unpacked
+  `(index, position)` as the enemy's `(x, y)`, so every enemy sat at `x = 0, 1, 2…`
+  and `y = the whole tuple`. All tests stayed green because they only **counted**
+  enemies, never checked **where** they stood. The missing mirror test — every
+  spawned enemy stands on a free field — is exactly what caught it once written.
+- *The IDE is not the source of truth.* An import written as `core.level` (instead of
+  `game.core.level`) ran fine in PyCharm, because `game/` is marked there as a Sources
+  Root. From the command line and CI it was a hard `ModuleNotFoundError` — the whole
+  suite could not even be collected. Red was pushed while the IDE showed green. Ruff
+  cannot catch this; only *running the tests* does.
+
+**Rejected.**
+- The map owning the live `Enemy` objects. That would put mutable gameplay state into
+  core geometry. The map stays pure geometry; it only *offers* free positions.
+- Two parallel lists (`list[Map]` + `list[list[Enemy]]`) coupled by index. Easy to
+  desync — a false state made *possible* instead of impossible.
+- A plain dict `{Map: [Enemy]}`. It keeps the binding but loses the `Dungeon`'s order
+  and never grows into a real domain object.
+- Handing a ready-made enemy list into the level factory. Then the spawn logic lives
+  outside again — a fresh orphan — and enemies could be built on the wrong map's
+  geometry.
+- Fixing the player's floor-1 start in this milestone. That is a separate (player)
+  concern → parked.
+
+**Parked.**
+- The player's start on floor 1 is still hardcoded `Player(1, 1)` in `main()`; it
+  matches the map start only by coincidence. It should be read from the first level's
+  map start, the way `descend` already does it — one source of truth. Behaviour-
+  preserving today → a small `refactor/`, no version tag.
+- A pre-push / CI guard that runs the tests, so the IDE can no longer wave a red push
+  through as green.
+- Clear the terminal between frames — the view still scrolls instead of redrawing in
+  place. (carried over)
+- A `Game` aggregate that holds player + dungeon and owns `play` — now designable,
+  since floor ownership is clean.
+- Combat / contact effect (M2): what happens when player and enemy meet.
