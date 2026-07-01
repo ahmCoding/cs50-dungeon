@@ -1,8 +1,7 @@
 import sys
 
-from core.level import Level
-
 from game.core.dungeon import Dungeon
+from game.core.level import Level
 from game.core.map import Map
 from game.core.player import Player
 from game.input.action import Action
