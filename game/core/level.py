@@ -26,7 +26,7 @@ class Level:
             )
 
         enemies: list[Enemy] = []
-        for _, r_pos in enumerate(random_free_pos_of_map):
+        for r_pos in random_free_pos_of_map:
             enemies.append(Enemy(*r_pos))
 
         return cls(g_map, enemies)
