@@ -10,7 +10,7 @@ class Level:
         self._enemies = enemies
 
     @classmethod
-    def get_level_object(cls, g_map: Map, enemy_count: int):
+    def get_level_object(cls, g_map: Map, enemy_count: int = 1):
         """function to create a Level object / factory
         :param g_map: game map
         :param enemy_count: number of enemies on the map, if this number is greater than
