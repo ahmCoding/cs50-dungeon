@@ -32,4 +32,21 @@ class Level:
         return cls(g_map, enemies)
 
     def get_enemies(self) -> list[Enemy]:
+        """
+        :return: list of enemies
+        """
         return self._enemies
+
+    def get_map(self) -> Map:
+        """function to get the map of current level
+        :return: Map
+        """
+        return self._g_map
+
+    def move_enemies(self) -> None:
+        """
+        function to move enemies of the current level
+        """
+        if self._enemies:
+            for enemy in self._enemies:
+                enemy.my_turn_to_move(self.get_map())

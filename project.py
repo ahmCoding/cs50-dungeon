@@ -1,7 +1,8 @@
 import sys
 
+from core.level import Level
+
 from game.core.dungeon import Dungeon
-from game.core.enemy import Enemy
 from game.core.map import Map
 from game.core.player import Player
 from game.input.action import Action
@@ -20,8 +21,8 @@ def move(g_map: Map, player: Player, p_direction: Player.Direction):
 
 
 def is_won(g_dungeon: Dungeon, player: Player) -> bool:
-    if g_dungeon.is_last_map():
-        return check_stairs(g_dungeon.get_current_map(), player)
+    if g_dungeon.is_last_level():
+        return check_stairs(g_dungeon.get_current_level().get_map(), player)
     return False
 
 
@@ -45,19 +46,21 @@ def descend(g_dungeon: Dungeon, player: Player) -> None:
     """
     descend to the deeper map and set the player on the start position of the map
     """
-    g_dungeon.next_map()
-    player.set_position(*g_dungeon.get_current_map().get_start_position())
+    g_dungeon.next_level()
+    player.set_position(*g_dungeon.get_current_level().get_map().get_start_position())
 
 
 def play(
     g_dungeon: Dungeon,
     player: Player,
-    enemy: Enemy,
     in_source: InputSource,
     renderer: Renderer,
 ) -> None:
     while True:
-        renderer.draw(g_dungeon.get_current_map(), [player, enemy])
+        renderer.draw(
+            g_dungeon.get_current_level().get_map(),
+            [player, *g_dungeon.get_current_level().get_enemies()],
+        )
 
         # the player has won the game , if he is on the last
         # map and on a stairs tile
@@ -69,12 +72,16 @@ def play(
             break
         if user_action == Action.NONE:
             continue
-        move(g_dungeon.get_current_map(), player, ACTION_TO_DIRECTION[user_action])
+        move(
+            g_dungeon.get_current_level().get_map(),
+            player,
+            ACTION_TO_DIRECTION[user_action],
+        )
         # next map
-        if check_stairs(g_dungeon.get_current_map(), player):
-            if not g_dungeon.is_last_map():
+        if check_stairs(g_dungeon.get_current_level().get_map(), player):
+            if not g_dungeon.is_last_level():
                 descend(g_dungeon, player)
-        enemy.my_turn_to_move(g_dungeon.get_current_map())
+        g_dungeon.get_current_level().move_enemies()
 
 
 def main():
@@ -83,13 +90,13 @@ def main():
 
     g_map1 = Map.get_map_obj(12, 8)
     g_map2 = Map.get_map_obj(12, 8)
-    g_dungeon = Dungeon([g_map1, g_map2])
+    l1 = Level.get_level_object(g_map1)
+    l2 = Level.get_level_object(g_map2)
+    g_dungeon = Dungeon([l1, l2])
     player = Player(1, 1)
-    enemy = Enemy(1, 3)  # only a random chosen pos for enemy
     t_render = TerminalRenderer()
-    # t_input = TerminalInput()
     print("w: up , s: down , a: left, d: right, q for quit")
-    play(g_dungeon, player, enemy, raw_terminal_input, t_render)
+    play(g_dungeon, player, raw_terminal_input, t_render)
 
 
 if __name__ == "__main__":

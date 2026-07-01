@@ -12,7 +12,7 @@ is sufficient for us.
 
 
 @pytest.fixture
-def g_level1():
+def g_map1():
     map1 = [
         [Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL],
         [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
@@ -24,7 +24,7 @@ def g_level1():
 
 
 @pytest.fixture
-def g_level2():
+def g_map2():
     map2 = [
         [Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL, Tile.WALL],
         [Tile.WALL, Tile.FIELD, Tile.FIELD, Tile.FIELD, Tile.WALL],
@@ -36,13 +36,13 @@ def g_level2():
 
 
 @pytest.fixture
-def g_map1(g_level1):
-    return Level.get_level_object(g_level1)
+def g_level1(g_map1):
+    return Level.get_level_object(g_map1)
 
 
 @pytest.fixture
-def g_map2(g_level2):
-    return Level.get_level_object(g_level2)
+def g_level2(g_map2):
+    return Level.get_level_object(g_map2)
 
 
 @pytest.fixture
