@@ -26,3 +26,11 @@ def test_number_of_enemies(g_map: Map) -> None:
 def test_no_enemies(g_map: Map) -> None:
     l1 = Level.get_level_object(g_map, 0)
     assert len(l1.get_enemies()) == 0
+
+
+def test_enemies_pos(g_map: Map) -> None:
+    """if the enemies exists in expected fields of the map"""
+    l1 = Level.get_level_object(g_map, 3)
+    free_poses = g_map.get_free_map_positions()
+    for enemy in l1.get_enemies():
+        assert enemy.get_position() in free_poses
