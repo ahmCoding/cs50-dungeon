@@ -1,3 +1,5 @@
+import random
+
 from game.core.enemy import Enemy
 from game.core.map import Map
 
@@ -19,7 +21,9 @@ class Level:
         enemies: list[Enemy] = []
         if free_pos_of_map:
             while enemy_counts > created_enemies and free_pos_of_map:
-                enemies.append(Enemy(*free_pos_of_map.pop()))
+                pos = random.choice(list(free_pos_of_map))
+                free_pos_of_map.remove(pos)
+                enemies.append(Enemy(*pos))
                 created_enemies += 1
 
         return cls(g_map, enemies)
