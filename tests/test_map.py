@@ -45,6 +45,15 @@ def test_number_of_free_positions(g_map: Map) -> None:
     assert len(free_pos) == 7
 
 
+def test_get_free_pos_all_movable() -> None:
+    """all positions, which are returned as free should be movable"""
+    for _ in range(100):
+        my_map = Map.get_map_obj()
+        free_pos = my_map.get_free_map_positions()
+        for pos in free_pos:
+            assert my_map.is_movable(*pos)
+
+
 def test_start_pos_not_a_free_positions() -> None:
     """the start position of the map should
     never be in the list of free positions"""
