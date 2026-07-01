@@ -152,3 +152,16 @@ class Map:
         in format of (x, y)
         """
         return self._stairs_position
+
+    def get_free_map_positions(self) -> set[tuple[int, int]]:
+        """the function to return free positions of the Map-Object .
+        a free position is a field which contains the Tile.Field as value and it's
+         positions coordinates are not the same ones as the starting position of the map
+        :return: a set of the positions , each position in format of (x, y)
+        """
+        free_positions = set()
+        for y, row in enumerate(self._map):
+            for x, tile in enumerate(row):
+                if tile == Tile.FIELD and (x, y) != self._start_position:
+                    free_positions.add((x, y))
+        return free_positions

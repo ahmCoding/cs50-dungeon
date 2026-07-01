@@ -366,4 +366,79 @@ would only be uglier.
 
 ---
 
-*Next entry: `v0.7` (or the next milestone) — added on its own branch when done.*
+## v0.7 — First Enemy (movement & turn order) (2026-06-30)
+
+**Context.** After v0.6 only one thing acted in the game: the player. Everything
+happened on a key press. An enemy is the first thing that acts on its own, so it
+is the backbone of the whole vision (combat, HP, XP, loot all hang off it). This
+milestone (M1) adds a second entity that moves after the player. Combat, blocking
+and contact effects are out of scope — that is M2.
+
+**Decision.**
+- Extracted a `Character` parent class out of `Player`. It holds the *shared*
+  movement mechanics: position, the `Direction` enum, `set_position`,
+  `get_position`, `next_position`, `move`. Both `Player` and `Enemy` inherit it,
+  so the shared code is written once.
+- `Player` stays a thin subclass — its direction comes from outside (the key press).
+- `Enemy` adds one own method `my_turn_to_move(g_map)`: collect every passable
+  neighbour direction, then pick one at random; if none are free, stand still.
+  The map is passed *as a method parameter* (dependency injection at the method,
+  not the constructor), so the enemy holds no map state and works on any map.
+- Turn order in `play`: after the player's move, the enemy takes its turn on the
+  current map. This one extra step is the heart of the milestone — the first time
+  the game does something without a key press.
+- Renderer: `draw` now takes `list[Character]` instead of a single player. It
+  stamps each entity onto the map by position. A new entity type no longer changes
+  the signature — it just joins the list. The entity→char mapping
+  `CHARACTER_TO_CHAR` lives in the renderer (core stays display-free) and is keyed
+  on the class object, typed `dict[type[Character], str]`.
+- Three property-based tests for the enemy: after a move it is never inside a wall;
+  a walled-in enemy stays exactly in place (deterministic); over 100 random maps it
+  always lands on a movable tile.
+
+**Why.**
+- *Abstract marks variation, not sharing.* Shared movement is real, concrete code,
+  so it lives once in the parent and is inherited. Only the *direction choice*
+  differs (key vs. dice). Since only the enemy rolls, that is simply one extra
+  method on the enemy — no abstract slot needed yet (YAGNI).
+- *"Retry until success" is only safe if a success exists.* A walled-in enemy has
+  no free neighbour, so rolling until movable would loop forever. So: collect the
+  free neighbours first, choose among them, stand still if the list is empty. This
+  also produces exactly the data a future "chase the player" enemy will need.
+- *Open/closed for the renderer.* Passing a list of drawables instead of one fixed
+  player argument means new entity types are added to the list, not to the signature.
+- *Class object as dict key, not its name string.* Keying on `__class__.__name__`
+  ("Enemy") breaks silently on a class rename — the string drifts away from the
+  class. Keying on the class object itself moves with the rename and is checked
+  statically.
+
+**Lesson.**
+- A green test can be worse than a red one. One enemy test moved the enemy on map A
+  but asserted against map B; it passed by luck while testing nothing real. A red
+  test shouts; a false-green whispers "all fine" and lies.
+- Changing a public signature means updating *all* callers in the same step — tests
+  included. After the renderer and `play` signatures changed, the suite went red
+  because the test call sites still used the old shape. The green net matters most
+  exactly when you reshape an interface.
+- The real acceptance test of a milestone is running it, not only a green suite.
+  Playing the game confirmed the enemy moves after each turn — and surfaced the
+  scroll issue below.
+
+**Rejected.**
+- Putting the enemy's move logic as a function in `project.py`. That mixes three
+  concerns: how an entity chooses (enemy), the move mechanics (Character), and
+  wiring the turn into the loop (play). Each stays in its own place.
+- Giving the enemy the map in its constructor / as instance state. The caller hands
+  in the current map at move time, so the enemy owns no map.
+- An abstract `choose_direction` slot in `Character`. With one enemy type and no
+  second implementation, that is premature abstraction.
+- Random spawn position for the enemy. It needs "forbidden zones" (not a wall, not
+  on the player, not on the stairs) and a real owner for the enemy's position — a
+  separate concern. A fixed spawn proves M1; the rest is the next milestone.
+
+**Parked (new).**
+- Enemies belong to a map/floor. Today a single enemy is passed into `play` and
+  carries across floors at the same coordinates. Enemies should be owned per map,
+  with a valid random spawn (forbidden zones). → next milestone (before combat).
+- Clear the terminal between frames — the view scrolls down instead of redrawing
+  in place.

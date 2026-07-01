@@ -36,3 +36,28 @@ def test_stairs_pos_and_start_pos() -> None:
     for _ in range(100):
         my_map = Map.get_map_obj()
         assert my_map.get_stairs_position() != my_map.get_start_position()
+
+
+def test_number_of_free_positions(g_map: Map) -> None:
+    """if the number of free positions on the injected map is correct"""
+    # 8 * Tile.Field - 1 (start position) = 7
+    free_pos = g_map.get_free_map_positions()
+    assert len(free_pos) == 7
+
+
+def test_start_pos_not_a_free_positions() -> None:
+    """the start position of the map should
+    never be in the list of free positions"""
+    for _ in range(100):
+        my_map = Map.get_map_obj()
+        free_pos = my_map.get_free_map_positions()
+        assert my_map.get_start_position() not in free_pos
+
+
+def test_stair_pos_not_a_free_positions() -> None:
+    """position of the stairs on a map should
+    never be in the list of free positions"""
+    for _ in range(100):
+        my_map = Map.get_map_obj()
+        free_pos = my_map.get_free_map_positions()
+        assert my_map.get_stairs_position() not in free_pos
