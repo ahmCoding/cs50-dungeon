@@ -92,7 +92,7 @@ def main():
     l1 = Level.get_level_object(g_map1)
     l2 = Level.get_level_object(g_map2)
     g_dungeon = Dungeon([l1, l2])
-    player = Player(1, 1)
+    player = Player(*g_dungeon.get_current_level().get_map().get_start_position())
     t_render = TerminalRenderer()
     print("w: up , s: down , a: left, d: right, q for quit")
     play(g_dungeon, player, raw_terminal_input, t_render)
