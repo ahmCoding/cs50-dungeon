@@ -180,9 +180,6 @@ its own branch, merged with `--no-ff`, and tagged.
 
 **Known small cleanups (parked)**
 
-- The player's floor-1 start is still hardcoded in `main()` and matches the map
-  start only by coincidence; it should be read from the first level's map start,
-  as `descend` already does — one source of truth. Behaviour-preserving today.
 - Clear the terminal between frames — the view scrolls instead of redrawing.
 - A pre-push / CI guard that runs the tests, so the IDE cannot wave a red push
   through as green.
