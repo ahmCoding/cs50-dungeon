@@ -534,3 +534,47 @@ Combat itself stays out of scope.
 - A `Game` aggregate that holds player + dungeon and owns `play` — now designable,
   since floor ownership is clean.
 - Combat / contact effect (M2): what happens when player and enemy meet.
+
+## refactor/player-start-pos — Player start sourced from the map (2026-07-01)
+
+**Context.** After v0.8, `main()` still created the player with a hardcoded
+`Player(1, 1)`. It matched the first map's start only by coincidence — the default
+start of `get_map_obj` is also `(1, 1)`. Meanwhile `descend` already placed the
+player by reading the current floor's map start. Two sources of truth for the same
+question ("where does the player enter a floor"), and one of them was a magic
+literal that would silently break the moment a map started somewhere else.
+
+**Decision.** `main()` now sources the player's initial position from the same
+place `descend` does:
+
+```python
+player = Player(*g_dungeon.get_current_level().get_map().get_start_position())
+```
+
+One line changed; `play` and every test untouched.
+
+**Why.** *Single source of truth.* The map owns `start_position`; the initial
+placement and every descent now both read it from there, so the two can never
+disagree. *No magic numbers.* `(1, 1)` carried no meaning — it worked by luck. The
+map start carries intent.
+
+**Lesson.** Two detours on this branch, both worth keeping:
+- The first attempt bundled a second change into `play`: caching the current map in
+  a local (`current_map`) with a hand-written staleness guard. It was scope creep
+  *and* the wrong fix. The guard called the very lookup it meant to avoid (so it
+  saved no calls), the `if` was a no-op (identical to unconditional assignment), and
+  it introduced derived state that must be kept in sync — a cache-invalidation
+  hazard traded for a purely cosmetic repetition. A fresh read never goes stale; a
+  cached copy can. Reverted with `git reset --hard origin/main` + `--force-with-lease`
+  (allowed: pushed but not merged, single author on the branch).
+- The "repeated chain" `g_dungeon.get_current_level().get_map()` (seven call sites)
+  was called a smell too eagerly. A delegating `Dungeon.get_current_map()` would only
+  *move* the chain into one place — small readability and coupling wins, no more.
+  Leaving the inline chain is perfectly fine. Naming something a "smell" does not
+  make it a bug.
+
+**Rejected.** A version tag — this changes no behaviour; all 46 tests stayed green
+and untouched, which is the proof. Also rejected: folding the current-map caching,
+or a `Dungeon.get_current_map()` delegate, into this branch. One concern, one
+branch; the name is `player-start-pos`, so that is all it does. The delegate, if
+ever wanted, earns its own refactor.
