@@ -24,7 +24,7 @@ def test_my_turn_to_move_choose_the_valid_move(g_map: Map):
     Enemy.my_turn_to_move
     """
     for _ in range(100):
-        enemy = Enemy(x=3, y=1)
+        enemy = Enemy.get_enemy_obj(x=3, y=1)
         enemy.my_turn_to_move(g_map)
         assert enemy.get_position() == (3, 2)
 
@@ -35,7 +35,7 @@ def test_my_turn_to_move_surrounded_by_walls(g_map: Map):
     be the same one after x.Times of call on Enemy.my_turn_to_move
     """
     for _ in range(100):
-        enemy = Enemy(x=1, y=1)
+        enemy = Enemy.get_enemy_obj(x=1, y=1)
         enemy.my_turn_to_move(g_map)
         assert enemy.get_position() == (1, 1)
 
@@ -48,6 +48,6 @@ def test_my_turn_to_move_random_map():
     for _ in range(100):
         r_map = Map.get_map_obj()
         # set the enemy on start position of the map(safe option for start on map)
-        enemy = Enemy(*r_map.get_start_position())
+        enemy = Enemy.get_enemy_obj(*r_map.get_start_position())
         enemy.my_turn_to_move(r_map)
         assert r_map.is_movable(*enemy.get_position())

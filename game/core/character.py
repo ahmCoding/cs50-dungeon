@@ -1,5 +1,7 @@
 from enum import Enum
 
+from game.core.weapon import Weapon
+
 
 class Character:
     """
@@ -18,13 +20,18 @@ class Character:
         LEFT = (-1, 0)
         RIGHT = (1, 0)
 
-    def __init__(self, x: int = 0, y: int = 0):
+    MAX_HP = 10
+
+    def __init__(self, x: int, y: int, weapon: Weapon) -> None:
         """
-        :param x: width
-        :param y: height
+        :param x: x position of the character / width
+        :param y: y position of the character / height
+        :param weapon: weapon of the character
         """
         self.x = x
         self.y = y
+        self.weapon = weapon
+        self.hp: int = self.MAX_HP
 
     def move(self, direction: Direction):
         """
@@ -53,3 +60,11 @@ class Character:
         """
         dx, dy = direction.value
         return self.x + dx, self.y + dy
+
+    def take_damage(self, amount: int) -> None:
+        """function to reduce the health points of the character"""
+        self.hp -= amount
+
+    def get_hp(self) -> int:
+        """function to return the current health points of the character"""
+        return self.hp

@@ -53,7 +53,7 @@ def g_dungeon(g_level1: Level, g_level2: Level):
 
 @pytest.fixture
 def player():
-    return Player(
+    return Player.get_player_obj(
         1, 1
     )  # player should start from a point in the map, which is not a wall
 
@@ -95,21 +95,21 @@ def test_move_to_lower_wall(g_map1: Map, player: Player):
 
 def test_player_on_stairs_game_not_won(g_dungeon: Dungeon):
     """we set the player on the stairs of the first Map"""
-    p1 = Player(2, 2)
+    p1 = Player.get_player_obj(2, 2)
     assert not is_won(g_dungeon, p1)
 
 
 def test_player_game_not_won(g_dungeon: Dungeon):
     """we set the player in the second Map on a normal field"""
     g_dungeon.next_level()
-    p1 = Player(2, 0)
+    p1 = Player.get_player_obj(2, 0)
     assert not is_won(g_dungeon, p1)
 
 
 def test_is_won_true(g_dungeon: Dungeon):
     """we set the player on the wining coordinate, second map x=3,y=4"""
     g_dungeon.next_level()
-    p1 = Player(3, 4)
+    p1 = Player.get_player_obj(3, 4)
     assert is_won(g_dungeon, p1)
 
 

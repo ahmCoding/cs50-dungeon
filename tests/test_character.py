@@ -1,11 +1,12 @@
 import pytest
 
 from game.core.character import Character
+from game.core.player import Player
 
 
 @pytest.fixture
 def player():
-    return Character()
+    return Player.get_player_obj()
 
 
 def test_player_move_up(player: Character):
