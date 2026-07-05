@@ -21,7 +21,7 @@ class Enemy(Character):
     def my_turn_to_move(self, g_map: Map):
         """function to move the Enemy-object
         the direction of the move is based on a randomly chosen direction between the
-        free field with distance of one to the current position of the
+        free fields with distance of one to the current position of the Enemy-Obj
         g_map: Map object
         """
         # find the moveable Direction

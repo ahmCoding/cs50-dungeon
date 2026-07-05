@@ -68,3 +68,7 @@ class Character:
     def get_hp(self) -> int:
         """function to return the current health points of the character"""
         return self.hp
+
+    def get_weapon_damage(self) -> int:
+        """function to get the damage power of the character"""
+        return self.weapon.get_damage()

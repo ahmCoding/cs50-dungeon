@@ -142,7 +142,8 @@ class Map:
     def get_start_position(self) -> tuple[int, int]:
         """
         :return: the starting position of the map as a tuple
-        in format of (x, y)
+        in format of (x, y) . the player will be placed at it
+        by beginning to play the map
         """
         return self._start_position
 

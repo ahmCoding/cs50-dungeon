@@ -9,7 +9,7 @@ from game.input.action import Action
 from game.input.scripted import ScriptedInput
 from game.render.null import NullRenderer
 from game.render.terminal import TerminalRenderer
-from project import is_won, move, play
+from project import execute_action, is_won, play
 
 
 @pytest.fixture
@@ -38,12 +38,20 @@ def g_map2():
 
 @pytest.fixture
 def g_level1(g_map1):
-    return Level.get_level_object(g_map1)
+    level = Level.get_level_object(g_map1)
+    # set the positon of default created enemy on (0,0) to create
+    # a deterministic range to move the player and test the movement logic
+    level.get_enemies()[0].set_position(0, 0)
+    return level
 
 
 @pytest.fixture
 def g_level2(g_map2):
-    return Level.get_level_object(g_map2)
+    level = Level.get_level_object(g_map2)
+    # set the positon of default created enemy on (0,0) to create
+    # a deterministic range to move the player and test the movement logic
+    level.get_enemies()[0].set_position(0, 0)
+    return level
 
 
 @pytest.fixture
@@ -63,33 +71,33 @@ def t_renderer():
     return TerminalRenderer()
 
 
-def test_move_to_right_wall(g_map1: Map, player: Player):
-    m_width, _ = g_map1.get_map_size()
+def test_move_to_right_wall(g_dungeon: Dungeon, player: Player):
+    m_width, _ = g_dungeon.get_current_level().get_map().get_map_size()
     for x in range(m_width):
-        move(g_map1, player, Player.Direction.RIGHT)
+        execute_action(g_dungeon, player, Player.Direction.RIGHT)
     assert (
         player.x == m_width - 2
     )  # range from 0 to m_width-1 and subtraction -1 for the wall
 
 
-def test_move_to_left_wall(g_map1: Map, player: Player):
-    m_width, _ = g_map1.get_map_size()
+def test_move_to_left_wall(g_dungeon: Dungeon, player: Player):
+    m_width, _ = g_dungeon.get_current_level().get_map().get_map_size()
     for x in range(m_width):
-        move(g_map1, player, Player.Direction.LEFT)
+        execute_action(g_dungeon, player, Player.Direction.LEFT)
     assert player.x == 1  # left wall x=0 , so the player is allowed only to x=1
 
 
-def test_move_to_upper_wall(g_map1: Map, player: Player):
-    _, m_height = g_map1.get_map_size()
+def test_move_to_upper_wall(g_dungeon: Dungeon, player: Player):
+    _, m_height = g_dungeon.get_current_level().get_map().get_map_size()
     for y in range(m_height):
-        move(g_map1, player, Player.Direction.UP)
+        execute_action(g_dungeon, player, Player.Direction.UP)
     assert player.y == 1
 
 
-def test_move_to_lower_wall(g_map1: Map, player: Player):
-    _, m_height = g_map1.get_map_size()
+def test_move_to_lower_wall(g_dungeon: Dungeon, player: Player):
+    _, m_height = g_dungeon.get_current_level().get_map().get_map_size()
     for y in range(m_height):
-        move(g_map1, player, Player.Direction.DOWN)
+        execute_action(g_dungeon, player, Player.Direction.DOWN)
     assert player.y == m_height - 2
 
 

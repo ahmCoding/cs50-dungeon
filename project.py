@@ -11,15 +11,33 @@ from game.render.base import Renderer
 from game.render.terminal import TerminalRenderer
 
 
-def move(g_map: Map, player: Player, p_direction: Player.Direction):
-    """function that moves the character according to the given direction
-    on the given map"""
+def execute_action(
+    g_dungeon: Dungeon, player: Player, p_direction: Player.Direction
+) -> None:
+    """function to execute the next action of the Player
+    If there is an enemy on the field, which the player is directed to,
+    this will be interpreted as an attack action on Enemy on the field.
+    If the field is free, the player will be moved to it.
+
+    """
     new_x, new_y = player.next_position(p_direction)
-    if g_map.is_movable(new_x, new_y):
+    if g_dungeon.get_current_level().attack_at(
+        (new_x, new_y), player.get_weapon_damage()
+    ):
+        return
+    # no attack could be executed, so a movement is the right action to execute
+    if g_dungeon.get_current_level().get_map().is_movable(new_x, new_y):
         player.move(p_direction)
 
 
 def is_won(g_dungeon: Dungeon, player: Player) -> bool:
+    """
+    function to check if the player won the game, the game is won if the player is
+    on stairs in the last map of the Dungeon.
+    :param g_dungeon:
+    :param player:
+    :return:
+    """
     if g_dungeon.is_last_level():
         return check_stairs(g_dungeon.get_current_level().get_map(), player)
     return False
@@ -71,11 +89,7 @@ def play(
             break
         if user_action == Action.NONE:
             continue
-        move(
-            g_dungeon.get_current_level().get_map(),
-            player,
-            ACTION_TO_DIRECTION[user_action],
-        )
+        execute_action(g_dungeon, player, ACTION_TO_DIRECTION[user_action])
         # next map
         if check_stairs(g_dungeon.get_current_level().get_map(), player):
             if not g_dungeon.is_last_level():
@@ -92,7 +106,9 @@ def main():
     l1 = Level.get_level_object(g_map1)
     l2 = Level.get_level_object(g_map2)
     g_dungeon = Dungeon([l1, l2])
-    player = Player(*g_dungeon.get_current_level().get_map().get_start_position())
+    player = Player.get_player_obj(
+        *g_dungeon.get_current_level().get_map().get_start_position()
+    )
     t_render = TerminalRenderer()
     print("w: up , s: down , a: left, d: right, q for quit")
     play(g_dungeon, player, raw_terminal_input, t_render)
