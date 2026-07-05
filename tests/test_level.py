@@ -57,9 +57,21 @@ def test_attack_at(g_map) -> None:
     l1 = Level.get_level_object(g_map, 1)
     e1 = l1.get_enemies()[0]
     e1.set_position(2, 1)
-    # the default hp für every object of Charackter/Enemy/Player ist 10
-    # after 3 attacks , there right value for hp is 7
-    l1.attack_at((2, 1), 1)
-    l1.attack_at((2, 1), 1)
-    l1.attack_at((2, 1), 1)
-    assert e1.get_hp() == 7
+    hp_before_attack = e1.get_hp()
+    num_attacks = 3
+    for _ in range(num_attacks):
+        l1.attack_at((2, 1), 1)
+
+    assert e1.get_hp() == hp_before_attack - num_attacks
+
+
+def test_attack_at_enemy_elimination_from_level(g_map) -> None:
+    """if dead enemy (Enemy.get_hp() < 0 ) will be eliminated from the level"""
+    l1 = Level.get_level_object(g_map, 1)
+    e1 = l1.get_enemies()[0]
+    e1.set_position(2, 1)
+    num_attacks = e1.get_hp()
+    for _ in range(num_attacks):
+        l1.attack_at((2, 1), 1)
+    # the list of enemies should be empty for the level
+    assert not l1.get_enemies()
