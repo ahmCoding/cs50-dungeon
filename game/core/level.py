@@ -1,5 +1,6 @@
 import random
 
+from game.core.character import Character
 from game.core.enemy import Enemy
 from game.core.map import Map
 
@@ -49,13 +50,17 @@ class Level:
         """
         return self._g_map
 
-    def move_enemies(self) -> None:
+    def move_enemies(self, other_character: Character) -> None:
         """
-        function to move enemies of the current level
+        function to move enemies of the current level.
+        if a character(player) is in reachable distance ,
+        it will be attacked instead of movement. see @Enemy.my_turn_to_move
+
+        :param other_character: character , which can be attacked
         """
         if self._enemies:
             for enemy in self._enemies:
-                enemy.my_turn_to_move(self.get_map())
+                enemy.my_turn_to_move(self.get_map(), other_character)
 
     def find_enemy_at_position(self, pos: tuple[int, int]) -> Enemy | None:
         """function to find and return enemy in a specific position

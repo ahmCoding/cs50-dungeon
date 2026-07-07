@@ -94,7 +94,7 @@ def play(
         if check_stairs(g_dungeon.get_current_level().get_map(), player):
             if not g_dungeon.is_last_level():
                 descend(g_dungeon, player)
-        g_dungeon.get_current_level().move_enemies()
+        g_dungeon.get_current_level().move_enemies(player)
 
 
 def main():
