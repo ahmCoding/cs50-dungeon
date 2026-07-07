@@ -138,6 +138,46 @@ def test_render_field(g_map1: Map, player: Player, t_renderer: TerminalRenderer)
     assert tmp_map[3][3] == TerminalRenderer.tile_to_char(g_map1.get_tile(3, 3))
 
 
+def test_execute_action_attack(g_dungeon: Dungeon, player: Player):
+    """if the move action is interpreted right,
+    when on the directed field is an enemy"""
+
+    enemy = g_dungeon.get_current_level().get_enemies()[
+        0
+    ]  # there is only one enemy in the level
+    enemy_pos = (1, 1)
+    player_pos = (2, 1)  # right to the enemy
+    enemy.set_position(*enemy_pos)
+    enemy_old_hp = enemy.get_hp()
+    player.set_position(*player_pos)
+    count_move = 1
+    for _ in range(count_move):
+        execute_action(g_dungeon, player, Player.Direction.LEFT)
+
+    assert player.get_position() == player_pos  # right pos
+    assert enemy.get_hp() == enemy_old_hp - count_move  # right hp of enemy after attack
+
+
+def test_execute_action_move(g_dungeon: Dungeon, player: Player):
+    """if the move action is interpreted right,
+    when the directed field is free"""
+
+    enemy = g_dungeon.get_current_level().get_enemies()[
+        0
+    ]  # there is only one enemy in the level
+    enemy_pos = (1, 1)
+    player_pos = (2, 1)  # right to the enemy
+    enemy.set_position(*enemy_pos)
+    enemy_old_hp = enemy.get_hp()
+    player.set_position(*player_pos)
+    count_move = 1
+    for _ in range(count_move):
+        execute_action(g_dungeon, player, Player.Direction.RIGHT)
+
+    assert player.get_position() != player_pos  # right pos
+    assert enemy.get_hp() == enemy_old_hp  # right hp of enemy after attack
+
+
 def test_play(
     g_dungeon: Dungeon,
     player: Player,
