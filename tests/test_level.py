@@ -60,7 +60,7 @@ def test_find_no_enemy(g_map: Map) -> None:
     assert l1.find_enemy_at_position((3, 1)) is None
 
 
-def test_attack_at(g_map) -> None:
+def test_attack_at(g_map, player: Player) -> None:
     """if a created , positioned and attacked enemy has the right health points"""
     l1 = Level.get_level_object(g_map, 1)
     e1 = l1.get_enemies()[0]
@@ -68,19 +68,19 @@ def test_attack_at(g_map) -> None:
     hp_before_attack = e1.get_hp()
     num_attacks = 3
     for _ in range(num_attacks):
-        l1.attack_at((2, 1), 1)
+        l1.attack_at((2, 1), player)
 
     assert e1.get_hp() == hp_before_attack - num_attacks
 
 
-def test_attack_at_enemy_elimination_from_level(g_map) -> None:
+def test_attack_at_enemy_elimination_from_level(g_map: Map, player: Player) -> None:
     """if dead enemy (Enemy.get_hp() < 0 ) will be eliminated from the level"""
     l1 = Level.get_level_object(g_map, 1)
     e1 = l1.get_enemies()[0]
     e1.set_position(2, 1)
     num_attacks = e1.get_hp()
     for _ in range(num_attacks):
-        l1.attack_at((2, 1), 1)
+        l1.attack_at((2, 1), player)
     # the list of enemies should be empty for the level
     assert not l1.get_enemies()
 

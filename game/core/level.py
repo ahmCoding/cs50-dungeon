@@ -71,17 +71,17 @@ class Level:
                 return enemy
         return None
 
-    def attack_at(self, position: tuple[int, int], damage: int) -> bool:
+    def attack_at(self, position: tuple[int, int], attacker: Character) -> bool:
         """
         function to execute an attack on a position. if there is an enemy
          at the position, the damage will be applied
 
         :param position: (x,y) coordinate to check for an enemy
-        :param damage: number of damage to apply
+        :param attacker:
         :return: True , of an enemy was found and damaged , else False
         """
         if enemy := self.find_enemy_at_position(position):
-            enemy.take_damage(damage)
+            enemy.take_damage(attacker.get_weapon_damage())
             self._remove_enemy_if_dead(enemy)
             return True
         return False

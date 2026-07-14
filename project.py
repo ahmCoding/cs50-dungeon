@@ -18,12 +18,13 @@ def execute_action(
     If there is an enemy on the field, which the player is directed to,
     this will be interpreted as an attack action on Enemy on the field.
     If the field is free, the player will be moved to it.
+    :param g_dungeon:
+    :param player:
+    :param p_direction: Direction of intended movement
 
     """
     new_x, new_y = player.next_position(p_direction)
-    if g_dungeon.get_current_level().attack_at(
-        (new_x, new_y), player.get_weapon_damage()
-    ):
+    if g_dungeon.get_current_level().attack_at((new_x, new_y), player):
         return
     # no attack could be executed, so a movement is the right action to execute
     if g_dungeon.get_current_level().get_map().is_movable(new_x, new_y):
